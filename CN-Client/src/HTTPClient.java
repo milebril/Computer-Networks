@@ -35,7 +35,7 @@ public class HTTPClient {
 		    BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 		    // send an HTTP request to the web server
 		    out.println(HTTPCommand + " / HTTP/1.1");
-		    //out.println("Host: www.google.com:80");
+		    out.println("Host: " + URI);
 		    out.println("Connection: Close");
 		    out.println();
 		    	
@@ -49,7 +49,7 @@ public class HTTPClient {
 		        more = false;
 		      else {
 		    	  	System.out.println(input);
-		        bf.write(input);
+		        bf.write(input + "\n");
 		      }
 		    }
 		    bf.close();
