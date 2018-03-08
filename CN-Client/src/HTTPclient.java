@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +10,10 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.*;
 import java.util.ArrayList;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 public class HTTPclient{
 
@@ -47,12 +52,9 @@ public class HTTPclient{
             return;
         }  
         
-        int port;
-        String httpversion = args[2];
-        
-        if (args.length == 4) { 
+        int port;     
+        if (args.length == 3) { 
 			port = Integer.parseInt(args[2]); // sets the port if one is given
-			httpversion = args[3]; // sets HTTP/1.1 or HTTP/1.0
 		} else {
 			port = 80; //Use Port 80 as standard when no port is given
 		}
@@ -61,12 +63,12 @@ public class HTTPclient{
  
         String hostname = url.getHost(); 
 
-        try (Socket socket = new Socket(hostname, port)) {
- 
+        try {
+        	Socket socket = new Socket(hostname, port);
             OutputStream output = socket.getOutputStream();
             PrintWriter writer = new PrintWriter(output, true);
  
-            writer.println(command + url.getPath() + " / " + httpversion);
+            writer.println(command +" /" + url.getPath() + " HTTP/1.1");
             writer.println("Host: " + hostname);
            // writer.println("User-Agent: Simple Http Client");
            // writer.println("Accept: text/html");
@@ -94,7 +96,16 @@ public class HTTPclient{
         } catch (IOException ex) {
             System.out.println("I/O error: " + ex.getMessage());
         }
+        SearchImages();
     }
 	
+		 public static void SearchImages() throws Exception{
+				File input = new File("res/output.html");
+				Document doc = Jsoup.parse(input, "UTF-8", " ");	
+				
+				for (Element e : doc.select("img")) {
+				    System.out.println(e.attr("src"));
+				}
+			}
 	
 }
