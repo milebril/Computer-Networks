@@ -1,7 +1,7 @@
 import java.io.*;
 import java.net.*;
 
-public class HTTPClient {
+public class HTTPclient {
 	
 	private static String HTTPCommand;
 	private static String URI;

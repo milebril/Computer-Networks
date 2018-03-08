@@ -1,7 +1,10 @@
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,6 +14,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Base64;
 
 import javax.imageio.ImageIO;
 
@@ -22,7 +26,7 @@ import org.jsoup.nodes.Element;
 public class Client{
 
 	/**
-	 * An arrayList consisting of the valid commands in HTTP.
+	 * An arrayList containing the valid commands in HTTP.
 	 */
 	private static final ArrayList<String> listOffCommands = new ArrayList<String>() {{
 		add("GET");
@@ -37,8 +41,8 @@ public class Client{
 	 * args =  the command line
 	 * @throws Exception 
 	 */
-	public static void main(String[] args) throws Exception {
-        if (args.length < 2) return; // return when no arguments are given 
+	public static void main(String[] args) throws Exception {       
+		if (args.length < 2) return; // return when no arguments are given 
         
         String command = " "; 
         
@@ -82,11 +86,13 @@ public class Client{
 		    BufferedWriter HTMLwriter = new BufferedWriter(new FileWriter(HTMLfile));
 
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                //System.out.println(line);
                 HTMLwriter.write(line);
                 HTMLwriter.newLine();
             }
             HTMLwriter.close();
+            
+            
             
         } catch (UnknownHostException ex) {
  
@@ -110,7 +116,8 @@ public class Client{
 				String hostname = url.getHost();
 				for (Element e : doc.select("img")) {
 					Socket socket = new Socket(hostname, port);
-				    try {
+				    
+					try {				    	
 			            OutputStream output = socket.getOutputStream();
 			            PrintWriter writer = new PrintWriter(output, true);
 			 
@@ -119,25 +126,23 @@ public class Client{
 			            writer.println("Connection: close");
 			            writer.println();
 			            
-			            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			            
+			            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));			            
 			            String line;  
-			            File HTMLfile = new File("res/" + e.attr("alt") +".png");
-			            
-			        
+			            File HTMLfile = new File("res/" + e.attr("alt") +".html");			            			        
 					    BufferedWriter HTMLwriter = new BufferedWriter(new FileWriter(HTMLfile));
 
 					    line = reader.readLine();
 					    while(!line.startsWith("Connection")) {
 					    	line = reader.readLine();
 					    }line = reader.readLine();	
-					    
+
 			            while ((line = reader.readLine()) != null){	
 			                HTMLwriter.write(line);
 			                HTMLwriter.newLine();
 			            }
-			    	
-			            HTMLwriter.close();			           			     
+			            System.out.println("________________close___________________");
+			            HTMLwriter.close();
+			            		            			           			     
 				    } catch (UnknownHostException ex) {
 				    	 
 			            System.out.println("Server not found: " + ex.getMessage());
@@ -147,5 +152,4 @@ public class Client{
 			        }
 				}
 			}
-	
 }
