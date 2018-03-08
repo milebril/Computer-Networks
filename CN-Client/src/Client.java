@@ -19,7 +19,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 
-public class HTTPclient{
+public class Client{
 
 	/**
 	 * An arrayList consisting of the valid commands in HTTP.
