@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -11,9 +12,12 @@ import java.io.PrintWriter;
 import java.net.*;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+
 
 public class HTTPclient{
 
@@ -59,8 +63,6 @@ public class HTTPclient{
 			port = 80; //Use Port 80 as standard when no port is given
 		}
         
-        
- 
         String hostname = url.getHost(); 
 
         try {
@@ -70,16 +72,13 @@ public class HTTPclient{
  
             writer.println(command +" /" + url.getPath() + " HTTP/1.1");
             writer.println("Host: " + hostname);
-           // writer.println("User-Agent: Simple Http Client");
-           // writer.println("Accept: text/html");
-           // writer.println("Accept-Language: en-US");
             writer.println("Connection: close");
             writer.println();
  
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
  
             String line;             
-            File HTMLfile = new File("../res/output.html");
+            File HTMLfile = new File("res/output.html");
 		    BufferedWriter HTMLwriter = new BufferedWriter(new FileWriter(HTMLfile));
 
             while ((line = reader.readLine()) != null) {
@@ -96,15 +95,56 @@ public class HTTPclient{
         } catch (IOException ex) {
             System.out.println("I/O error: " + ex.getMessage());
         }
-        SearchImages();
+        SearchImages(url, port);
     }
 	
-		 public static void SearchImages() throws Exception{
+	/**
+	 * 
+	 * @param url
+	 * @param port
+	 * @throws Exception
+	 */
+		 public static void SearchImages(URL url, int port) throws Exception{
 				File input = new File("res/output.html");
 				Document doc = Jsoup.parse(input, "UTF-8", " ");	
-				
+				String hostname = url.getHost();
 				for (Element e : doc.select("img")) {
-				    System.out.println(e.attr("src"));
+					Socket socket = new Socket(hostname, port);
+				    try {
+			            OutputStream output = socket.getOutputStream();
+			            PrintWriter writer = new PrintWriter(output, true);
+			 
+			            writer.println("GET" +" /" + url.getPath() + e.attr("src") + " HTTP/1.1");
+			            writer.println("Host: " + hostname);
+			            writer.println("Connection: close");
+			            writer.println();
+			            
+			            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			            
+			            String line;  
+			            File HTMLfile = new File("res/" + e.attr("alt") +".png");
+			            
+			        
+					    BufferedWriter HTMLwriter = new BufferedWriter(new FileWriter(HTMLfile));
+
+					    line = reader.readLine();
+					    while(!line.startsWith("Connection")) {
+					    	line = reader.readLine();
+					    }line = reader.readLine();	
+					    
+			            while ((line = reader.readLine()) != null){	
+			                HTMLwriter.write(line);
+			                HTMLwriter.newLine();
+			            }
+			    	
+			            HTMLwriter.close();			           			     
+				    } catch (UnknownHostException ex) {
+				    	 
+			            System.out.println("Server not found: " + ex.getMessage());
+			 
+			        } catch (IOException ex) {
+			            System.out.println("I/O error: " + ex.getMessage());
+			        }
 				}
 			}
 	
