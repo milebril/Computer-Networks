@@ -9,10 +9,17 @@ public class Server implements Runnable{
 	Boolean Running = true;
 	Thread thread = null;
 	
+	/**
+	 * constructor
+	 * @param port
+	 */
 	public Server(int port){
 		this.serverPort = port;
 	}
 	
+	/**
+	 * starts a new socket on the given port.
+	 */
 	public void openServerSocket() {
 		try {
 			this.serverSocket = new ServerSocket(this.serverPort);
@@ -37,13 +44,13 @@ public class Server implements Runnable{
 		}
 	}
 		
-	public void stop() {
-		this.Running = false;
-        try {
-            this.serverSocket.close();
-        } catch (IOException e) {
-            throw new RuntimeException("Server can not be closed: ", e);
-        }  
-	}
+//	public void stop() {
+//		this.Running = false;
+//        try {
+//            this.serverSocket.close();
+//        } catch (IOException e) {
+//            throw new RuntimeException("Server can not be closed: ", e);
+//        }  
+//	}
 }
 	

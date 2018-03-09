@@ -16,6 +16,10 @@ public class Workable implements Runnable {
 
 	Socket clientSocket = null;
 	
+	/**
+	 * constructor
+	 * @param client
+	 */
 	public Workable(Socket client) {
 		this.clientSocket = client;
 	}
@@ -32,21 +36,28 @@ public class Workable implements Runnable {
 				String header = "";
 				
 				requestedString = request.readLine();
-				header = header + requestedString + "\n";
-				
-				String path = requestedString.split(" ")[1].substring(1);
-				String command = requestedString.split(" ")[0];
-				
+				header = header + requestedString + "\n";				
+				String path = requestedString.split(" ")[1].substring(0);				
+				if(path.equals("/"))path = "/index.html";  // change / to /index.html													
+				String command = requestedString.split(" ")[0];				
 				while(!requestedString.isEmpty()) {
 					requestedString = request.readLine();
 					header = header + requestedString + "\n";
 					;
-				}			
-				StringBuilder head = getHeader(200);
-				File HTMLfile = new File("../res" + path);
-				response.write(head.toString());
-				response.write(HtmlToString(HTMLfile));				
-				response.flush();
+				}
+				
+				if (command.equals("GET") &&  (new File("../res" + path).exists())) {				
+					StringBuilder head = getHeader(200);
+					File HTMLfile = new File("../res" + path);
+					response.write(head.toString());
+					response.write(HtmlToString(HTMLfile));				
+					response.flush();
+				}
+				if (command.equals("GET") &&  (!new File("../res" + path).exists())) {				
+					StringBuilder head = getHeader(404);
+					response.write(head.toString());			
+					response.flush();
+				}
 				
 				request.close();
 				response.close();
@@ -56,6 +67,11 @@ public class Workable implements Runnable {
 	        }
 	}
 	
+	/**
+	 * changes an html file to a single string
+	 * @param file
+	 * @return string containing the text of an html file
+	 */
 	public String HtmlToString(File file) {
 		StringBuilder contentBuilder = new StringBuilder();
 		try {
@@ -69,12 +85,13 @@ public class Workable implements Runnable {
 		}
 		String content = contentBuilder.toString();
 		return content;
-	}
+	}	
 	
-	public Boolean fileExists() {
-		return true;
-	}
-	
+	/**
+	 * returns the response header 
+	 * @param code
+	 * @return response header
+	 */
 	public StringBuilder getHeader(int code) {
 		StringBuilder head = new StringBuilder();
 		switch (code) {
@@ -86,16 +103,28 @@ public class Workable implements Runnable {
 			head.append("Connection: Closed\r\n\r\n");
 			break;
 		case 404:
+			head.append("HTTP/1.1 404 Not Found\r\n");
+			head.append("Date:" + getTimeStamp() + "\r\n");
+			head.append("Server:localhost\r\n");
+			head.append("\r\n");
 		case 400:	
 		case 500:
-		case 304:	
+		case 304:
+			head.append("HTTP/1.1 304 Not Modified\r\n");
+			head.append("Date:" + getTimeStamp() + "\r\n");
+			head.append("Server:localhost\r\n");
+			head.append("\r\n");
 		}return head;
 	}
 
-		private static String getTimeStamp() {
-			Date date = new Date();
-			SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
-			String formattedDate = sdf.format(date);
-			return formattedDate;
-		}
+	/**
+	 * returns the current date and time 
+	 * @return string containing the date and time
+	 */
+	private static String getTimeStamp() {
+		Date date = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
+		String formattedDate = sdf.format(date);
+		return formattedDate;
+	}
 }
