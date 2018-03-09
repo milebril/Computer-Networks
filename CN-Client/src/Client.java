@@ -73,7 +73,7 @@ public class Client{
         String hostname = url.getHost(); 
 
         try {
-        		Socket socket = new Socket(hostname, port);
+        	Socket socket = new Socket(hostname, port);
             OutputStream output = socket.getOutputStream();
             PrintWriter writer = new PrintWriter(output, true);
  
@@ -93,7 +93,7 @@ public class Client{
                 HTMLwriter.newLine();
             }
             HTMLwriter.close();
-            
+            SearchImages(url, port);
             
             
         } catch (UnknownHostException ex) {
@@ -103,7 +103,7 @@ public class Client{
         } catch (IOException ex) {
             System.out.println("I/O error: " + ex.getMessage());
         }
-        SearchImages(url, port);
+        
     }
 	
 	/**
@@ -116,41 +116,53 @@ public class Client{
 				File input = new File("res/output.html");
 				Document doc = Jsoup.parse(input, "UTF-8", " ");	
 				String hostname = url.getHost();
+				int count = 0;
 				for (Element e : doc.select("img")) {
 					Socket socket = new Socket(hostname, port);
 				    
 					try {				    	
 			            OutputStream output = socket.getOutputStream();
 			            PrintWriter writer = new PrintWriter(output, true);
-			 
-			            writer.println("GET" +" /" + url.getPath() + e.attr("src") + " HTTP/1.1");
-			            writer.println("Host: " + hostname);
+			            System.out.println("image:");
+			            System.out.println("GET " +"/" + url.getPath() + e.attr("src") + " HTTP/1.1");
+			            System.out.println("Host: " + hostname);
+			            writer.println("GET " +"/" + url.getPath() + e.attr("src") + " HTTP/1.1");
+			            writer.println("Host: " + hostname + ":" + port);
+//			            writer.println();
 			            writer.println("Connection: close");
 			            writer.println();
-			            
+			            			            
 			            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));			            
-			            String line;  
-			            File HTMLfile = new File("res/" + e.attr("alt") +".gif");			            			        
+			            String line; 
+			            File HTMLfile;
+			            if (!e.attr("alt").equals("")) {
+			            		HTMLfile = new File("res/" + e.attr("alt") +".html");	
+			            } else {
+			            		HTMLfile = new File("res/" + count + ".html");	
+			            		count++;
+			            }		            			        
 					    BufferedWriter HTMLwriter = new BufferedWriter(new FileWriter(HTMLfile));
-
-					    line = reader.readLine();
-					    while(!line.startsWith("Connection")) {
-					    	line = reader.readLine();
-					    }line = reader.readLine();	
+			    			            
+//					    line = reader.readLine();
+//					    while(!line.startsWith("Connection")) {
+//					    	line = reader.readLine();
+//					    }line = reader.readLine();	
 					    
 			            while ((line = reader.readLine()) != null){	
 			                HTMLwriter.write(line);
 			                HTMLwriter.newLine();
 			            }
-			            
-			            //BufferedReader bf = new BufferedReader(new FileReader(HTMLfile));
-			            byte[] s = Files.readAllBytes(Paths.get("res/" + e.attr("alt") +".html"));
-			            String str = DatatypeConverter.printBase64Binary(s);
-			            
-			            System.out.println(str); 
-//			            System.out.println("________________close___________________");
+			          			            
+//			            BufferedReader bf = new BufferedReader(new FileReader(HTMLfile));
+//			            byte[] s = Files.readAllBytes(Paths.get("res/" + e.attr("alt") +".html"));
+//			            String str = DatatypeConverter.printBase64Binary(s);
+//			            
+//			            System.out.println(str); 
 			            HTMLwriter.close();
-			            		            			           			     
+			  
+//			            writer.println("Connection: close");
+//			            writer.println();
+			            
 				    } catch (UnknownHostException ex) {
 				    	 
 			            System.out.println("Server not found: " + ex.getMessage());
@@ -158,6 +170,7 @@ public class Client{
 			        } catch (IOException ex) {
 			            System.out.println("I/O error: " + ex.getMessage());
 			        }
-				}
+					
+				}System.out.println("all images written");
 			}
 }
