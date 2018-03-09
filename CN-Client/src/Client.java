@@ -13,10 +13,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 
 import javax.imageio.ImageIO;
+import javax.xml.bind.DatatypeConverter;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -70,7 +73,7 @@ public class Client{
         String hostname = url.getHost(); 
 
         try {
-        	Socket socket = new Socket(hostname, port);
+        		Socket socket = new Socket(hostname, port);
             OutputStream output = socket.getOutputStream();
             PrintWriter writer = new PrintWriter(output, true);
  
@@ -80,7 +83,6 @@ public class Client{
             writer.println();
  
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
- 
             String line;             
             File HTMLfile = new File("res/output.html");
 		    BufferedWriter HTMLwriter = new BufferedWriter(new FileWriter(HTMLfile));
@@ -128,19 +130,25 @@ public class Client{
 			            
 			            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));			            
 			            String line;  
-			            File HTMLfile = new File("res/" + e.attr("alt") +".html");			            			        
+			            File HTMLfile = new File("res/" + e.attr("alt") +".gif");			            			        
 					    BufferedWriter HTMLwriter = new BufferedWriter(new FileWriter(HTMLfile));
 
 					    line = reader.readLine();
 					    while(!line.startsWith("Connection")) {
 					    	line = reader.readLine();
 					    }line = reader.readLine();	
-
+					    
 			            while ((line = reader.readLine()) != null){	
 			                HTMLwriter.write(line);
 			                HTMLwriter.newLine();
 			            }
-			            System.out.println("________________close___________________");
+			            
+			            //BufferedReader bf = new BufferedReader(new FileReader(HTMLfile));
+			            byte[] s = Files.readAllBytes(Paths.get("res/" + e.attr("alt") +".html"));
+			            String str = DatatypeConverter.printBase64Binary(s);
+			            
+			            System.out.println(str); 
+//			            System.out.println("________________close___________________");
 			            HTMLwriter.close();
 			            		            			           			     
 				    } catch (UnknownHostException ex) {
