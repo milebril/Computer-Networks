@@ -30,7 +30,7 @@ public class Client{
 		response.printHeader();
 		
 		if (request.getCommand().equals("GET")) {
-			SearchImages();
+			SearchEmbededObjects();
 		}
     }
 	
@@ -39,7 +39,7 @@ public class Client{
 	 * @param port
 	 * @throws Exception
 	 */
-	 public static void SearchImages() throws Exception{
+	 public static void SearchEmbededObjects() throws Exception{
 			File input = new File("res/index.html");
 			Document doc = Jsoup.parse(input, "UTF-8", " ");	
 			for (Element e : doc.select("img")) {
@@ -63,6 +63,5 @@ public class Client{
 				}
 				
 			}
-			//System.out.println("All images recieved");
 		}
 }
