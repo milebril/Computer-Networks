@@ -36,25 +36,29 @@ public class Workable implements Runnable {
 				String header = "";
 				
 				requestedString = request.readLine();
-				header = header + requestedString + "\n";				
-				String path = requestedString.split(" ")[1].substring(0);				
-				if(path.equals("/"))path = "/index.html";  // change / to /index.html													
+				header = header + requestedString + "\n";
+				String path = "";
+				if(!requestedString.isEmpty()) path = requestedString.split(" ")[1].substring(0);
+				if(path.equals("/"))path = "/index.html";  // change / to /index.html
+				String filetype = "";
+				if(requestedString.contains(".") && !path.isEmpty()) filetype = path.substring(path.lastIndexOf("." ) + 1);
+				System.out.println(filetype);
 				String command = requestedString.split(" ")[0];				
 				while(!requestedString.isEmpty()) {
-					requestedString = request.readLine();
-					header = header + requestedString + "\n";
-					;
+					requestedString = request.readLine();					
+					header = header + requestedString + "\n";					
 				}
-				
+				System.out.println(header);
 				if (command.equals("GET") &&  (new File("../res" + path).exists())) {				
-					StringBuilder head = getHeader(200);
+					StringBuilder head = getHeader(200,filetype);
+					System.out.println(head);
 					File HTMLfile = new File("../res" + path);
 					response.write(head.toString());
 					response.write(HtmlToString(HTMLfile));				
 					response.flush();
 				}
 				if (command.equals("GET") &&  (!new File("../res" + path).exists())) {				
-					StringBuilder head = getHeader(404);
+					StringBuilder head = getHeader(404,filetype);
 					response.write(head.toString());			
 					response.flush();
 				}
@@ -92,14 +96,23 @@ public class Workable implements Runnable {
 	 * @param code
 	 * @return response header
 	 */
-	public StringBuilder getHeader(int code) {
+	public StringBuilder getHeader(int code, String type) {
 		StringBuilder head = new StringBuilder();
+		String filetype = "";
+		if(type.equals("png")) filetype = "image/png\r\n";
+		else if(type.equals("jpg")) filetype = "image/jpg\r\n";
+		else if(type.equals("html")) filetype = "text/html\r\n";
+		else if(type.equals("css"))	filetype = "text/css\r\n";
+		else if(type.equals("gif"))	filetype = "image/gif\r\n";
+		else if(type.equals("js"))	filetype = "text/javascript\r\n";
+		else filetype = "text/html\r\n";
+		
 		switch (code) {
 		case 200:
 			head.append("HTTP/1.1 200 OK\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
-			head.append("Content-Type: text/html\r\n");
+			head.append("Content-Type: " + filetype);
 			head.append("Connection: Closed\r\n\r\n");
 			break;
 		case 404:

@@ -32,15 +32,17 @@ public class Server implements Runnable{
 	public void run() {
 		this.thread = Thread.currentThread();
 		openServerSocket();
+		Socket client = null;
 		while(Running) {
-			Socket client = null;
 			try {
 				client = this.serverSocket.accept();
+				System.out.println("Connected client:" + client.getInetAddress().getCanonicalHostName());
+				new Thread(new Workable(client)).start();;
 			}catch(IOException ex) {
 				System.out.println("server has stopped");
 			}
-			System.out.println("Connected client:" + client.getInetAddress().getCanonicalHostName());
-			new Thread(new Workable(client)).start();;
+//			System.out.println("Connected client:" + client.getInetAddress().getCanonicalHostName());
+//			new Thread(new Workable(client)).start();;
 		}
 	}
 		
