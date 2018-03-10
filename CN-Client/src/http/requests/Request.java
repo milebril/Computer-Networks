@@ -3,6 +3,8 @@ package http.requests;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import http.errors.notEnoughArgumentsException;
+
 public class Request {
 	
 	private String[]  validCommandos = new String[] {
@@ -25,7 +27,7 @@ public class Request {
 		this.URL = new URL(URL);
 		this.URI = this.URL.getHost();
 		this.path = this.URL.getPath();
-		
+
 		if (port < 9999) {
 			this.port = port;
 		} else {

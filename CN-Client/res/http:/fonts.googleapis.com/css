@@ -1,0 +1,12 @@
+HTTP/1.1 304 Not Modified
+Date:03/10/2018 7:37:23 PM
+Server:localhost
+
+HTTP/1.1 500 Internal Server Error
+Date:03/10/2018 7:37:23 PM
+Server:localhost
+
+HTTP/1.1 400 Bad Request
+Date:03/10/2018 7:37:23 PM
+Server:localhost
+

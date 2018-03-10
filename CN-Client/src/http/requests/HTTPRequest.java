@@ -32,8 +32,6 @@ public class HTTPRequest {
 	 * @throws IOException
 	 */
 	public HTTPRequest(Request request) throws IOException {
-		this.request = request;
-
 		switch (request.getCommand()) {
 		case "HEAD": 
 			httpResponse = HTTPHeadRequest.getHeadRequest(request);
@@ -42,13 +40,10 @@ public class HTTPRequest {
 			httpResponse = HTTPImageRequest.getImageRequest(request);
 			break;
 		case "PUT":
-			makePutConnection();
-			inputStream = clientSocket.getInputStream();
-			httpResponse = new HTTPResponse(inputStream);
-			clientSocket.close();
-			httpResponse.printHeader();
+			httpResponse = HTTPPutRequest.getPutRequest(request);
 			break;
 		case "POST":
+			httpResponse = HTTPPostRequest.getPostRequest(request);
 			break;
 		}
 	}
@@ -60,46 +55,43 @@ public class HTTPRequest {
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	protected static void createHeader(String type, Request request) throws UnknownHostException, IOException {
+	protected static Socket createHeader(String type, Request request) throws UnknownHostException, IOException {
 		clientSocket = new Socket(request.getURI(), request.getPort());
 		OutputStream output = clientSocket.getOutputStream();
 		PrintWriter writer = new PrintWriter(output, true);
 		
-		System.out.println(request.getCommand() + request.getPath() + " HTTP/1.1\r");
-		
-		writer.println(request.getCommand() + " /" + request.getPath() + " HTTP/1.1\r");
+		System.out.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1\r");
+		if (request.getPath().startsWith("/"))
+			writer.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1\r");
+		else
+			writer.println(request.getCommand() + " /" + request.getPath() + " HTTP/1.1\r");
 		writer.println("Host: " + request.getURI() + ":" + request.getPort() +"\r");
 		writer.println("Accept: " + type + "\r");
 		writer.println("Connection: close\r");
 		writer.println("\r");
+		
+		return clientSocket;
 	}
 	
-	public HTTPResponse getResponse() {
-		return httpResponse;
-	}
-
-	public void makePutConnection() {
-		String toSend = HtmlToString(new File("res/put/test.html"));
-		System.out.println("Sending " + toSend);
-		try {
-			clientSocket = new Socket(request.getURI(), request.getPort());
-			OutputStream otherOutput = clientSocket.getOutputStream();
-	        PrintWriter otherWriter = new PrintWriter(otherOutput, true);
-	        //System.out.println(request.getCommand() +" " + request.getPath() + " HTTP/1.1\r");
-	        otherWriter.println(request.getCommand() +" " + request.getPath() + " HTTP/1.1\r");
-	        otherWriter.println("Host: " + request.getURI() + "\r");
-	        otherWriter.println("Connection: Keep-Alive" + "\r");
-	        otherWriter.println("Content-type: text/html\r");
-	        otherWriter.println("\r");
-	        
-	        otherWriter.print(toSend);
-	        otherWriter.println("\r");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	/**
+	 * Creating the body of a PUT or POST message, ending with a blank line
+	 * @param socket the socket to send data through
+	 * @param toSend the string that needs to be the body
+	 * @throws IOException
+	 */
+	protected static void createTextMessageBody(Socket socket, String toSend) throws IOException {
+		OutputStream output = clientSocket.getOutputStream();
+		PrintWriter writer = new PrintWriter(output, true);
+		writer.println(toSend);
+		writer.println("\r");
 	}
 	
-	public String HtmlToString(File file) {
+	/**
+	 * Reads the given HTML file and appends a String such that the string contains the whole file to send
+	 * @param file
+	 * @return
+	 */
+	protected static String HtmlToString(File file) {
 		StringBuilder contentBuilder = new StringBuilder();
 		try {
 		    BufferedReader in = new BufferedReader(new FileReader(file));
@@ -113,4 +105,8 @@ public class HTTPRequest {
 		String content = contentBuilder.toString();
 		return content;
 	}	
+	
+	public HTTPResponse getResponse() {
+		return httpResponse;
+	}
 }

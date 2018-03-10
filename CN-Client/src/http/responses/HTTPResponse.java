@@ -43,7 +43,7 @@ public class HTTPResponse {
 	/**
 	 * Separates the header by reading bytes till the \r character. Putting these in a byte array and then
 	 * making it into a string which we save.
-	 * We stop when the string has a lenght of 0, and thus we have an empty line.
+	 * We stop when the string has a length of 0, and thus we have an empty line.
 	 * @param inputStream The stream we read from
 	 */
 	private void separateHeader(InputStream inputStream) {

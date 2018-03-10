@@ -1,4 +1,4 @@
-package http.requests;
+package http.errors;
 
 public class notEnoughArgumentsException extends Exception {
 	
