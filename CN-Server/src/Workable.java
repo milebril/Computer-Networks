@@ -1,18 +1,19 @@
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import org.omg.CORBA.portable.InputStream;
 
 public class Workable implements Runnable {
 
@@ -30,66 +31,157 @@ public class Workable implements Runnable {
 	@Override
 	public void run() {
 		 try {
-		 	 	System.out.println(Thread.currentThread().getName());
+		 	 	System.out.println(Thread.currentThread().getName()); //prints out the current thread
 			 	BufferedReader request = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
-				BufferedWriter response = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));								
-				String requestedString = request.readLine();
+				BufferedWriter response = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));
+				
+				String requestedString = request.readLine(); 
 				String header = requestedString + "\n";								
 				String path = "";
 				String filetype = "";
 				
-				if(!requestedString.isEmpty()) path = requestedString.split(" ")[1].substring(0);
+				if(!requestedString.isEmpty()) path = requestedString.split(" ")[1].substring(0); //path to file
 				if(path.equals("/"))path = "/index.html";  // change / to /index.html								
-				if(requestedString.contains(".") && !path.isEmpty()) filetype = path.substring(path.lastIndexOf("." ) + 1);
+				if(requestedString.contains(".") && !path.isEmpty()) filetype = path.substring(path.lastIndexOf("." ) + 1); //the type of the file
 				
-				String command = requestedString.split(" ")[0];				
-				while(!requestedString.isEmpty()) {
+				String command = requestedString.split(" ")[0];	//GET,PUT,HEAD,POST command	
+				
+				//input the client
+				while(!requestedString.equals("")) {
 					requestedString = request.readLine();					
 					header = header + requestedString + "\n";					
 				}
 				System.out.println(header);
 				
-				//client does something wrong
-				if (badRequest()) {
-					StringBuilder head = getHeader(400,filetype);
-					response.write(head.toString());			
+				
+				//file found and HEAD command
+				if(command.equals("HEAD") &&  (new File("../res" + path).exists())) {
+					StringBuilder head = getHeader(200,filetype);
+					response.write(head.toString());
+					response.write(head.toString());
 					response.flush();
 				}
-				//file found
+				
+				
+				
+				//POST command
+				else if(command.equals("POST")) {
+					String tempbody = request.readLine();
+					String body = tempbody + "\n";
+					while(!tempbody.isEmpty()) {
+						tempbody = request.readLine();
+						body = body + tempbody + "\n";
+					}
+					StringBuilder head = getHeader(addToServer(body, path),filetype);
+					response.write(head.toString());
+					response.flush();
+				}
+				
+				
+				
+				//PUT command
+				else if(command.equals("PUT")) {
+					String tempbody = request.readLine();
+					String body = tempbody + "\n";				
+					while(!tempbody.isEmpty()) {
+						tempbody = request.readLine();
+						body = body + tempbody + "\n";
+					}
+					StringBuilder head = getHeader(writeToServer(body, path),"");
+					response.write(head.toString());
+					response.flush();
+				}
+				
+				
+				
+				//file found and GET command
 				else if (command.equals("GET") &&  (new File("../res" + path).exists())) {				
 					StringBuilder head = getHeader(200,filetype);
 					System.out.println(head);
 					File HTMLfile = new File("../res" + path);
-					System.out.println(HTMLfile);
 					this.size = HtmlToString(HTMLfile).length();
 					response.write(head.toString());
 					response.write(HtmlToString(HTMLfile));				
 					response.flush();
 				}
+				
+				
+				
 				//file not found
 				else if (command.equals("GET") &&  (!new File("../res" + path).exists())) {				
 					StringBuilder head = getHeader(404,filetype);
 					response.write(head.toString());			
 					response.flush();
 				}
-				//When everything else fails, consider it an internal error
+				
+				
+				
+				//client did something wrong
 				else {
-					StringBuilder head = getHeader(500,filetype);
+					StringBuilder head = getHeader(400,filetype);
 					response.write(head.toString());			
 					response.flush();
 				}
 				
 				request.close();
 				response.close();
-	        } catch (IOException e) {           
-	            
-	        }
+				
+				
+			//when everything fails consider it an internal error
+	        } catch (IOException ex) { 
+	        	try {
+	        	System.out.println(Thread.currentThread().getName());
+				BufferedWriter response = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));								
+	        	StringBuilder head = getHeader(500,"");
+				response.write(head.toString());			
+				response.flush();
+				response.close();
+	        	}catch(Exception e) {
+	        		
+	        	}
+	        }return;	 
 	}
 	
-	public Boolean badRequest() {
-		return false;
+	/**
+	 * adds text to a file, or creates the file and adds the text and returns the corresponding responsecode
+	 * @param body
+	 * @param path
+	 * @return
+	 */
+	private int addToServer(String body, String path) {
+		File file = new File("../res" + path);
+		BufferedWriter bodyWriter;
+		try {
+			bodyWriter = new BufferedWriter(new FileWriter(file,true));
+			bodyWriter.append(body);
+			bodyWriter.close();
+			return 200;
+		} catch (IOException ex) {
+			return 304;
+		}
+		
 	}
-	
+
+	/**
+	 * creates a file with the given name, adds text and returns the corresponding responsecode
+	 * @param body
+	 * @param path
+	 * @return
+	 */
+	private int writeToServer(String body, String path) {
+		File file = new File("../res" + path);
+		BufferedWriter bodyWriter;
+		try {
+			bodyWriter = new BufferedWriter(new FileWriter(file));
+			bodyWriter.write(body);
+			bodyWriter.close();
+			System.out.println("written to server");
+			return 200;
+		} catch (IOException ex) {
+			return 304;
+		}		
+	}
+
 	/**
 	 * changes an html file to a single string
 	 * @param file
@@ -140,7 +232,7 @@ public class Workable implements Runnable {
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
 			head.append("\r\n");
-		case 400:
+		case 304:
 			head.append("HTTP/1.1 304 Not Modified\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
@@ -150,7 +242,7 @@ public class Workable implements Runnable {
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
 			head.append("\r\n");
-		case 304:
+		case 400:
 			head.append("HTTP/1.1 400 Bad Request\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
