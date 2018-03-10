@@ -9,12 +9,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Workable implements Runnable {
 
 	Socket clientSocket = null;
+	int size;
 	
 	/**
 	 * constructor
@@ -29,36 +32,49 @@ public class Workable implements Runnable {
 		 try {
 		 	 	System.out.println(Thread.currentThread().getName());
 			 	BufferedReader request = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
-				BufferedWriter response = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));
-				
-				
-				String requestedString = "1";
-				String header = "";
-				
-				requestedString = request.readLine();
-				header = header + requestedString + "\n";
+				BufferedWriter response = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));								
+				String requestedString = request.readLine();
+				String header = requestedString + "\n";								
 				String path = "";
-				if(!requestedString.isEmpty()) path = requestedString.split(" ")[1].substring(0);
-				if(path.equals("/"))path = "/index.html";  // change / to /index.html
 				String filetype = "";
+				
+				if(!requestedString.isEmpty()) path = requestedString.split(" ")[1].substring(0);
+				if(path.equals("/"))path = "/index.html";  // change / to /index.html								
 				if(requestedString.contains(".") && !path.isEmpty()) filetype = path.substring(path.lastIndexOf("." ) + 1);
-				System.out.println(filetype);
+				
 				String command = requestedString.split(" ")[0];				
 				while(!requestedString.isEmpty()) {
 					requestedString = request.readLine();					
 					header = header + requestedString + "\n";					
 				}
 				System.out.println(header);
-				if (command.equals("GET") &&  (new File("../res" + path).exists())) {				
+				
+				//client does something wrong
+				if (badRequest()) {
+					StringBuilder head = getHeader(400,filetype);
+					response.write(head.toString());			
+					response.flush();
+				}
+				//file found
+				else if (command.equals("GET") &&  (new File("../res" + path).exists())) {				
 					StringBuilder head = getHeader(200,filetype);
 					System.out.println(head);
 					File HTMLfile = new File("../res" + path);
+					System.out.println(HTMLfile);
+					this.size = HtmlToString(HTMLfile).length();
 					response.write(head.toString());
 					response.write(HtmlToString(HTMLfile));				
 					response.flush();
 				}
-				if (command.equals("GET") &&  (!new File("../res" + path).exists())) {				
+				//file not found
+				else if (command.equals("GET") &&  (!new File("../res" + path).exists())) {				
 					StringBuilder head = getHeader(404,filetype);
+					response.write(head.toString());			
+					response.flush();
+				}
+				//When everything else fails, consider it an internal error
+				else {
+					StringBuilder head = getHeader(500,filetype);
 					response.write(head.toString());			
 					response.flush();
 				}
@@ -66,9 +82,12 @@ public class Workable implements Runnable {
 				request.close();
 				response.close();
 	        } catch (IOException e) {           
-	            System.out.println("error: "); 
-	            e.printStackTrace();
+	            
 	        }
+	}
+	
+	public Boolean badRequest() {
+		return false;
 	}
 	
 	/**
@@ -113,6 +132,7 @@ public class Workable implements Runnable {
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
 			head.append("Content-Type: " + filetype);
+			if(type.equals("jpg") || type.equals("png")) head.append("Content-Length: " + this.size + "\r\n");
 			head.append("Connection: Closed\r\n\r\n");
 			break;
 		case 404:
@@ -120,10 +140,18 @@ public class Workable implements Runnable {
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
 			head.append("\r\n");
-		case 400:	
-		case 500:
-		case 304:
+		case 400:
 			head.append("HTTP/1.1 304 Not Modified\r\n");
+			head.append("Date:" + getTimeStamp() + "\r\n");
+			head.append("Server:localhost\r\n");
+			head.append("\r\n");
+		case 500:
+			head.append("HTTP/1.1 500 Internal Server Error\r\n");
+			head.append("Date:" + getTimeStamp() + "\r\n");
+			head.append("Server:localhost\r\n");
+			head.append("\r\n");
+		case 304:
+			head.append("HTTP/1.1 400 Bad Request\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
 			head.append("\r\n");
