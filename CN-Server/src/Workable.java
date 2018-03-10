@@ -1,24 +1,25 @@
-import java.io.BufferedInputStream;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.net.URLConnection;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.omg.CORBA.portable.InputStream;
+import javax.imageio.ImageIO;
 
 public class Workable implements Runnable {
 
 	Socket clientSocket = null;
-	int size;
+	private int size;
 	
 	/**
 	 * constructor
@@ -95,13 +96,28 @@ public class Workable implements Runnable {
 				
 				
 				//file found and GET command
-				else if (command.equals("GET") &&  (new File("../res" + path).exists())) {				
-					StringBuilder head = getHeader(200,filetype);
-					System.out.println(head);
-					File HTMLfile = new File("../res" + path);
-					this.size = HtmlToString(HTMLfile).length();
-					response.write(head.toString());
-					response.write(HtmlToString(HTMLfile));				
+				else if (command.equals("GET") &&  (new File("../res" + path).exists())) {			
+					if(filetype.equals("jpg") || filetype.equals("png")) {
+						BufferedImage image = ImageIO.read(new File("../res" + path));
+						ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+				        ImageIO.write(image, filetype, byteArrayOutputStream);
+				        byte[] imageInBytes = byteArrayOutputStream.toByteArray();		
+						this.size = imageInBytes.length;
+						StringBuilder head = getHeader(200,filetype);
+						response.write(head.toString());
+						String test = new String(imageInBytes, "UTF-8");
+						response.write(test);
+						byteArrayOutputStream.close();
+						System.out.println(head);
+					}else {
+						StringBuilder head = getHeader(200,filetype);
+						response.write(head.toString());
+						File HTMLfile = new File("../res" + path);		
+						response.write(HtmlToString(HTMLfile));
+						System.out.println(head);
+					}	
+					
+									
 					response.flush();
 				}
 				
@@ -111,6 +127,39 @@ public class Workable implements Runnable {
 				else if (command.equals("GET") &&  (!new File("../res" + path).exists())) {				
 					StringBuilder head = getHeader(404,filetype);
 					response.write(head.toString());			
+					response.flush();
+				}
+				
+				
+				
+				//DELETE command and file found
+				else if (command.equals("DELETE") &&  (new File("../res" + path).exists())) {				
+					StringBuilder head = new StringBuilder();
+					try {
+						new File("../res" + path).delete();
+						head = getHeader(200,filetype);
+					} catch(Exception er) {
+						head = getHeader(404,filetype);
+					}
+					response.write(head.toString());			
+					response.flush();
+					
+				}
+				
+				
+				
+				//OPTIONS returns the list of request methods supported
+				else if(command.equals("OPTIONS")) {
+					StringBuilder head = getHeader(201, filetype);
+					response.write(head.toString());
+					StringBuilder options = new StringBuilder();
+					options.append("GET: A client can use the GET request to get a web resource from the server.\r\n");
+					options.append("HEAD: A client can use the HEAD request to get the header that a GET request would have obtained.\r\n");
+					options.append("POST: Used to post data up to the web server.\r\n");
+					options.append("PUT: Ask the server to store the data.\r\n");
+					options.append("DELETE: Ask the server to delete the data.\r\n");
+					options.append("OPTIONS: Ask the server to return the list of request methods it supports.\r\n");
+					response.write(options.toString());
 					response.flush();
 				}
 				
@@ -227,6 +276,15 @@ public class Workable implements Runnable {
 			if(type.equals("jpg") || type.equals("png")) head.append("Content-Length: " + this.size + "\r\n");
 			head.append("Connection: Closed\r\n\r\n");
 			break;
+		case 201:
+			head.append("HTTP/1.1 200 OK\r\n");
+			head.append("Date:" + getTimeStamp() + "\r\n");
+			head.append("Server:localhost\r\n");
+			head.append("Content-Type: " + filetype);
+			if(type.equals("jpg") || type.equals("png")) head.append("Content-Length: " + this.size + "\r\n");
+			head.append("Allow: GET, HEAD, POST, OPTIONS, PUT, DELETE\r\n");
+			head.append("Connection: Closed\r\n\r\n");
+			break;	
 		case 404:
 			head.append("HTTP/1.1 404 Not Found\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
