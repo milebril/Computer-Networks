@@ -6,7 +6,7 @@ public class notEnoughArgumentsException extends Exception {
 
 	@Override
 	public String getMessage() {
-		return "Please use the correct format: {Commando} {URL} {URL}(optional).";
+		return "Please use the correct format: {Commando} {URL} {PORT}(optional).";
 	}
 	
 }

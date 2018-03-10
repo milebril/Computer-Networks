@@ -28,6 +28,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import http.HTTPRequest;
+import http.HTTPResponse;
 import http.Request;
 
 
@@ -50,33 +52,41 @@ public class Client{
 			request = new Request(args[0], args[1]);
 		}
 		
-        try {
-        		System.out.println(request.getPort() );
-        		clientSocket = new Socket(request.getURI(), request.getPort());
-            OutputStream output = clientSocket.getOutputStream();
-            PrintWriter writer = new PrintWriter(output, true);
- 
-            writer.println(request.getCommand() +" /" + request.getPath() + " HTTP/1.1");
-            writer.println("Host: " + request.getURI());
-            writer.println("Connection: close");
-            writer.println();
- 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            String line;             
-            File HTMLfile = new File("res/output.html");
-		    BufferedWriter HTMLwriter = new BufferedWriter(new FileWriter(HTMLfile));
-
-            while ((line = reader.readLine()) != null) {
-                HTMLwriter.write(line);
-                HTMLwriter.newLine();
-            }
-            HTMLwriter.close();
-            clientSocket.close();
-            SearchImages();
-            
-        } catch (IOException ex) {
-            System.out.println("I/O error: " + ex.getMessage());
-        }
+		HTTPRequest httpRequest = new HTTPRequest(request);
+		HTTPResponse response = httpRequest.getResponse();
+		
+		SearchImages();
+		
+//        try {
+//        		System.out.println(request.getPort() );
+//        		clientSocket = new Socket(request.getURI(), request.getPort());
+//            OutputStream output = clientSocket.getOutputStream();
+//            PrintWriter writer = new PrintWriter(output, true);
+// 
+//            writer.println(request.getCommand() +" /" + request.getPath() + " HTTP/1.1");
+//            writer.println("Host: " + request.getURI());
+//            writer.println("Connection: close");
+//            writer.println();
+//            
+//            // HTTPResponse response = new HTTPResponse(clientSocket.getInputStream());
+// 
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//            String line;             
+//            File HTMLfile = new File("res/output.html");
+//		    BufferedWriter HTMLwriter = new BufferedWriter(new FileWriter(HTMLfile));
+//
+//            while ((line = reader.readLine()) != null) {
+//                HTMLwriter.write(line);
+//                HTMLwriter.newLine();
+//            }
+//            
+//            HTMLwriter.close();
+//            clientSocket.close();
+//            
+//            
+//        } catch (IOException ex) {
+//            System.out.println("I/O error: " + ex.getMessage());
+//        }
         
     }
 	
@@ -87,65 +97,15 @@ public class Client{
 	 * @throws Exception
 	 */
 		 public static void SearchImages() throws Exception{
-				File input = new File("res/output.html");
+				File input = new File("res/index.html");
 				Document doc = Jsoup.parse(input, "UTF-8", " ");	
-				
-				int count = 0;
 				for (Element e : doc.select("img")) {
-					try {				    	
-						Socket clientSocket = new Socket(request.getURI(), request.getPort());
-			            OutputStream output = clientSocket.getOutputStream();
-			            PrintWriter writer = new PrintWriter(output, true);
-			            System.out.println("GET " +"/" + request.getPath() + e.attr("src") + " HTTP/1.1");
-			            writer.println("GET " +"/" + request.getPath() + e.attr("src") + " HTTP/1.1\r");
-			            writer.println("Host: " + request.getURI() + ":" + request.getPort() +"\r");
-			            writer.println("Connection: close\r");
-			            writer.println();
-			            			            
-			            InputStream inputStream = clientSocket.getInputStream();
-
-			            File HTMLfile = new File("res/" + e.attr("src"));	;
-			            
-					   OutputStream out = new FileOutputStream(HTMLfile);
-			            
-					   String headerString;
-					   
-					   do {
-						   byte[] headerLine = new byte[1024];
-						   byte temp;
-						   int counter = 0;
-						   
-						   while((temp = (byte) inputStream.read()) != '\r') {
-							   headerLine[counter++] = temp;
-						   }
-						   inputStream.read(); //Skip LF
-						   
-						   headerString = new String(Arrays.copyOfRange(headerLine, 0, counter));
-						   //if (headerString.startsWith("Content-Type"))
-						   
-						   //System.out.println("L:" + headerString.length() + " " + headerString);
-						   
-					   } while (headerString.length() != 0);
-					   
-					   byte[] b = new byte[64 * 1024];
-					   int d = 0;
-					   int totalLen = 0;
-					   do {
-						   totalLen += d;
-						   d = inputStream.read(b);
-						   if (d != -1) {
-							   out.write(b, 0, d);
-					   		}
-					   } while(d != -1);
-					   
-					   System.out.println(totalLen);
-					   out.close();
-					   clientSocket.close();
-			            
-					} catch (IOException ex) {
-			            System.out.println("I/O error: " + ex.getMessage());
-			        }
-					
+					System.out.println(request.getURL().toString() + "/" + e.attr("src"));
+					Request imgRequest = new Request("GET", 
+							request.getURL().toString() + "/" + e.attr("src")
+							, request.getPort()); //Set up a new Request
+					HTTPRequest request = new HTTPRequest(imgRequest); //Make the request
+					HTTPResponse response = request.getResponse(); //Here is the response written
 				}
 				
 				System.out.println("all images written");
