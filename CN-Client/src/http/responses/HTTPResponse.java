@@ -1,10 +1,12 @@
-package http;
+package http.responses;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import http.requests.Request;
 
 public class HTTPResponse {
 	
@@ -38,6 +40,12 @@ public class HTTPResponse {
 		return "none";
 	}
 	
+	/**
+	 * Separates the header by reading bytes till the \r character. Putting these in a byte array and then
+	 * making it into a string which we save.
+	 * We stop when the string has a lenght of 0, and thus we have an empty line.
+	 * @param inputStream The stream we read from
+	 */
 	private void separateHeader(InputStream inputStream) {
 		String headerString;
 		try {
@@ -48,8 +56,6 @@ public class HTTPResponse {
 			   
 			    while((temp = (byte) inputStream.read()) != '\r') {
 			    		headerLine[counter++] = temp;
-//			    		System.out.println(counter);
-//			    		System.out.println(new String(Arrays.copyOfRange(headerLine, 0, counter)));
 			    }
 			    inputStream.read(); //Skip LF
 			    
