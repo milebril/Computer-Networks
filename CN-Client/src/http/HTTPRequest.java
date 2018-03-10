@@ -16,19 +16,29 @@ public class HTTPRequest {
 	public HTTPRequest(Request request) throws IOException {
 		this.request = request;
 		
-		if (request.getPath().endsWith("html") || request.getPath().endsWith("css") || request.getPath() == "") {
-			makeConnection("text");
-			InputStream inputStream = clientSocket.getInputStream();
-			httpResponse = new HTTPTextResponse(request, inputStream);
-			clientSocket.close();
-		} else if (request.getPath().endsWith("png") || request.getPath().endsWith("jpg")) {
-			makeConnection("image");
-			InputStream inputStream = clientSocket.getInputStream();
-			httpResponse = new HTTPImageResponse(request, inputStream);
-			clientSocket.close();
-		} else {
-			System.out.println("Not supported extension at request: " + request.getCommand() + " " + 
-					request.getURL());
+		switch (request.getCommand()) {
+		case "HEAD":
+			break;
+		case "GET":
+			if (request.getPath().endsWith("html") || request.getPath().endsWith("css") || request.getPath() == "") {
+				makeConnection("text");
+				InputStream inputStream = clientSocket.getInputStream();
+				httpResponse = new HTTPTextResponse(request, inputStream);
+				clientSocket.close();
+			} else if (request.getPath().endsWith("png") || request.getPath().endsWith("jpg")) {
+				makeConnection("image");
+				InputStream inputStream = clientSocket.getInputStream();
+				httpResponse = new HTTPImageResponse(request, inputStream);
+				clientSocket.close();
+			} else {
+				System.out.println("Not supported extension at request: " + request.getCommand() + " " + 
+						request.getURL());
+			}
+			break;
+		case "PUT":
+			break;
+		case "POST":
+			break;
 		}
 	}
 	
