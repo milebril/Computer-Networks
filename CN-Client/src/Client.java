@@ -28,7 +28,9 @@ public class Client{
 		HTTPRequest httpRequest = new HTTPRequest(request);
 		HTTPResponse response = httpRequest.getResponse();
 		
-		SearchImages();
+		if (request.getCommand().equals("GET")) {
+			SearchImages();
+		}
     }
 	
 	/**

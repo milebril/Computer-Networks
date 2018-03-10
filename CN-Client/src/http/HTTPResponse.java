@@ -42,12 +42,14 @@ public class HTTPResponse {
 		String headerString;
 		try {
 			do {
-				byte[] headerLine = new byte[1024];
+				byte[] headerLine = new byte[2048];
 			    byte temp;
 			    int counter = 0;
 			   
 			    while((temp = (byte) inputStream.read()) != '\r') {
 			    		headerLine[counter++] = temp;
+//			    		System.out.println(counter);
+//			    		System.out.println(new String(Arrays.copyOfRange(headerLine, 0, counter)));
 			    }
 			    inputStream.read(); //Skip LF
 			    
