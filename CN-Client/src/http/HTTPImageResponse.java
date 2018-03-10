@@ -32,7 +32,6 @@ public class HTTPImageResponse extends HTTPResponse {
 			   		}
 			   } while(d != -1);
 			   
-			   System.out.println(totalLen);
 			   out.close();
 		} catch (IOException e) {
 			e.printStackTrace();
