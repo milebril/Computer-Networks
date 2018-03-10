@@ -8,6 +8,11 @@ import http.responses.HTTPResponse;
 
 public class HTTPPostRequest extends HTTPRequest{
 
+	/**
+	 * Makes an HTTP POST request, with the given arguments which are passed in request
+	 * @param request
+	 * @return Returns a HTTPResponse containing the header of the response from the server
+	 */
 	public static HTTPResponse getPostRequest(Request request) {
 		try {
 			String toSend = HtmlToString(new File("res/" + request.getPath()));

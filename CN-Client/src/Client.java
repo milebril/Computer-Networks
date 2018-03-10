@@ -15,7 +15,7 @@ public class Client{
 	
 	/**
 	 * TODO documentation
-	 * @param args =  the command line
+	 * @param inputted through command line {COMMAND} {URL} {PORT}(optional)
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception { 
