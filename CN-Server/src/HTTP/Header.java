@@ -73,6 +73,11 @@ public class Header {
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
 			head.append("\r\n");	
+		case 418:
+			head.append("HTTP/1.1 418 I'm a teapot\r\n");
+			head.append("Date:" + getTimeStamp() + "\r\n");
+			head.append("Server:localhost\r\n");
+			head.append("\r\n");		
 		}this.header = head;
 	}
 	
