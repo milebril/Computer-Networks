@@ -42,6 +42,8 @@ public class Client{
 	 public static void SearchEmbededObjects() throws Exception{
 			File input = new File("res/index.html");
 			Document doc = Jsoup.parse(input, "UTF-8", " ");	
+			
+			//Search for img tags
 			for (Element e : doc.select("img")) {
 				System.out.println(request.getURL().toString() + "/" + e.attr("src"));
 				Request imgRequest = new Request("GET", 
@@ -52,6 +54,7 @@ public class Client{
 				HTTPResponse response = request.getResponse(); //Here is the response written
 			}
 			
+			//search for style tags
 			for (Element e : doc.select("link")) {
 				if (e.attr("rel").equals("stylesheet")) {
 					//String href = e.attr("href");

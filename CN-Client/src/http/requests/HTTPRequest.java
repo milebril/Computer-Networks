@@ -45,6 +45,9 @@ public class HTTPRequest {
 		case "POST":
 			httpResponse = HTTPPostRequest.getPostRequest(request);
 			break;
+		case "GETCOFFEE":
+			httpResponse = HTTPGetCoffeeRequest.getGetCoffeeRequest(request);
+			break;
 		}
 	}
 	
