@@ -1,26 +1,22 @@
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-import javax.imageio.ImageIO;
+import HTTP.Header;
+
 
 public class Workable implements Runnable {
 
 	Socket clientSocket = null;
-	private int size;
+	private int size = 0;
 	
 	/**
 	 * constructor
@@ -53,15 +49,14 @@ public class Workable implements Runnable {
 					header = header + requestedString + "\n";					
 				}
 				System.out.println(header);
-				
+				Header head = new Header();
 				
 					//HEAD command
 					if(command.equals("HEAD")) {
-						StringBuilder head = new StringBuilder();
-						if (new File("../res" + path).exists()) head = getHeader(200,filetype); //file found
-						else head = getHeader(404,filetype); // file not found
-						response.write(head.toString());
-						response.write(head.toString());
+						if (new File("../res" + path).exists()) head.setHeader(200,filetype,this.size); //file found
+						else head.setHeader(404,filetype,this.size); // file not found
+						response.write(head.getHeader().toString());
+						response.write(head.getHeader().toString());
 						response.flush();
 					}
 				
@@ -75,10 +70,9 @@ public class Workable implements Runnable {
 							tempbody = request.readLine();
 							body = body + tempbody + "\n";
 						}
-						StringBuilder head = new StringBuilder();
-						if(command.equals("PUT"))head = getHeader(writeToServer(body, path),filetype); //PUT
-						else head = getHeader(addToServer(body, path),filetype); // POST
-						response.write(head.toString());
+						if(command.equals("PUT"))head.setHeader(writeToServer(body, path),filetype,this.size); //PUT
+						else head.setHeader(addToServer(body, path),filetype,this.size); // POST
+						response.write(head.getHeader().toString());
 						response.flush();
 					}
 				
@@ -88,12 +82,12 @@ public class Workable implements Runnable {
 					else if (command.equals("GET") &&  (new File("../res" + path).exists())) {			
 						if(filetype.equals("jpg") || filetype.equals("png")) {
 							this.size = (int) new File("../res" + path).length();
-							StringBuilder head = getHeader(200, filetype);
+							head.setHeader(200, filetype,this.size);
 							
 							OutputStream out = clientSocket.getOutputStream();
 							FileInputStream fis = new FileInputStream(new File("../res" + path));
 							
-							char[] c = head.toString().toCharArray();
+							char[] c = head.getHeader().toString().toCharArray();
 							for (int i = 0; i < c.length; i ++) {
 								out.write((byte) c[i]);
 							}
@@ -112,8 +106,8 @@ public class Workable implements Runnable {
 						    
 							System.out.println(head);
 						}else {
-							StringBuilder head = getHeader(200,filetype);
-							response.write(head.toString());
+							head.setHeader(200, filetype,this.size);
+							response.write(head.getHeader().toString());
 							File HTMLfile = new File("../res" + path);		
 							response.write(HtmlToString(HTMLfile));
 							System.out.println(head);
@@ -127,31 +121,20 @@ public class Workable implements Runnable {
 					
 					//file not found
 					else if (command.equals("GET") &&  (!new File("../res" + path).exists())) {				
-						StringBuilder head = getHeader(404,filetype);
-						response.write(head.toString());			
+						head.setHeader(404,filetype,this.size);
+						response.write(head.getHeader().toString());			
 						response.flush();
 					}
-				
-				
-					//file not found
-					else if (command.equals("GET") &&  (!new File("../res" + path).exists())) {				
-						StringBuilder head = getHeader(404,filetype);
-						response.write(head.toString());			
-						response.flush();
-					}
-					
-					
-					
+								
 					//DELETE command and file found
 					else if (command.equals("DELETE") &&  (new File("../res" + path).exists())) {				
-						StringBuilder head = new StringBuilder();
 						try {
 							new File("../res" + path).delete();
-							head = getHeader(200,filetype);
+							head.setHeader(200,filetype,this.size);
 						} catch(Exception er) {
-							head = getHeader(404,filetype);
+							head.setHeader(404,filetype,this.size);
 						}
-						response.write(head.toString());			
+						response.write(head.getHeader().toString());			
 						response.flush();
 						
 					}
@@ -160,8 +143,8 @@ public class Workable implements Runnable {
 				
 					//OPTIONS returns the list of request methods supported
 					else if(command.equals("OPTIONS")) {
-						StringBuilder head = getHeader(201, filetype);
-						response.write(head.toString());
+						head.setHeader(201,filetype,this.size);
+						response.write(head.getHeader().toString());
 						StringBuilder options = new StringBuilder();
 						options.append("GET: A client can use the GET request to get a web resource from the server.\r\n");
 						options.append("HEAD: A client can use the HEAD request to get the header that a GET request would have obtained.\r\n");
@@ -178,8 +161,8 @@ public class Workable implements Runnable {
 					//Wrong method
 					else if (!command.equals("GET") ||  !command.equals("PUT") ||  !command.equals("POST") ||  !command.equals("HEAD") ||  !command.equals("OPTIONS") ||  
 							!command.equals("DELETE")) {				
-						StringBuilder head = getHeader(501,filetype);
-						response.write(head.toString());			
+						head.setHeader(501,filetype,this.size);
+						response.write(head.getHeader().toString());			
 						response.flush();
 					}
 					
@@ -187,8 +170,8 @@ public class Workable implements Runnable {
 					
 					//client did something wrong
 					else {
-						StringBuilder head = getHeader(400,filetype);
-						response.write(head.toString());			
+						head.setHeader(400,filetype,this.size);
+						response.write(head.getHeader().toString());			
 						response.flush();
 					}
 					
@@ -199,10 +182,11 @@ public class Workable implements Runnable {
 			//when everything fails consider it an internal server error
 	        } catch (IOException ex) { 
 	        	try {
+	        	Header head = new Header();
 	        	System.out.println(Thread.currentThread().getName());
 				BufferedWriter response = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));								
-	        	StringBuilder head = getHeader(500,"");
-				response.write(head.toString());			
+				head.setHeader(500,"",this.size);
+				response.write(head.getHeader().toString());			
 				response.flush();
 				response.close();
 	        	}catch(Exception e) {
@@ -270,77 +254,4 @@ public class Workable implements Runnable {
 		String content = contentBuilder.toString();
 		return content;
 	}	
-	
-	/**
-	 * returns the response corresponding header 
-	 * @param code
-	 * @return response header
-	 */
-	public StringBuilder getHeader(int code, String type) {
-		StringBuilder head = new StringBuilder();
-		String filetype = "";
-		if(type.equals("png")) filetype = "image/png\r\n";
-		else if(type.equals("jpg")) filetype = "image/jpg\r\n";
-		else if(type.equals("html")) filetype = "text/html\r\n";
-		else if(type.equals("css"))	filetype = "text/css\r\n";
-		else if(type.equals("gif"))	filetype = "image/gif\r\n";
-		else if(type.equals("js"))	filetype = "text/javascript\r\n";
-		else filetype = "text/html\r\n";
-		
-		switch (code) {
-		case 200:
-			head.append("HTTP/1.1 200 OK\r\n");
-			head.append("Date:" + getTimeStamp() + "\r\n");
-			head.append("Server:localhost\r\n");
-			head.append("Content-Type: " + filetype);
-			if(type.equals("jpg") || type.equals("png")) head.append("Content-Length: " + this.size + "\r\n");
-			head.append("Connection: Closed\r\n\r\n");
-			break;
-		case 201:
-			head.append("HTTP/1.1 200 OK\r\n");
-			head.append("Date:" + getTimeStamp() + "\r\n");
-			head.append("Server:localhost\r\n");
-			head.append("Content-Type: " + filetype);
-			if(type.equals("jpg") || type.equals("png")) head.append("Content-Length: " + this.size + "\r\n");
-			head.append("Allow: GET, HEAD, POST, OPTIONS, PUT, DELETE\r\n");
-			head.append("Connection: Closed\r\n\r\n");
-			break;	
-		case 404:
-			head.append("HTTP/1.1 404 Not Found\r\n");
-			head.append("Date:" + getTimeStamp() + "\r\n");
-			head.append("Server:localhost\r\n");
-			head.append("\r\n");
-		case 304:
-			head.append("HTTP/1.1 304 Not Modified\r\n");
-			head.append("Date:" + getTimeStamp() + "\r\n");
-			head.append("Server:localhost\r\n");
-			head.append("\r\n");
-		case 500:
-			head.append("HTTP/1.1 500 Internal Server Error\r\n");
-			head.append("Date:" + getTimeStamp() + "\r\n");
-			head.append("Server:localhost\r\n");
-			head.append("\r\n");
-		case 400:
-			head.append("HTTP/1.1 400 Bad Request\r\n");
-			head.append("Date:" + getTimeStamp() + "\r\n");
-			head.append("Server:localhost\r\n");
-			head.append("\r\n");
-		case 501:
-			head.append("HTTP/1.1 501 Method Not Implemented\r\n");
-			head.append("Date:" + getTimeStamp() + "\r\n");
-			head.append("Server:localhost\r\n");
-			head.append("\r\n");	
-		}return head;
-	}
-
-	/**
-	 * returns the current date and time 
-	 * @return string containing the date and time
-	 */
-	private static String getTimeStamp() {
-		Date date = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
-		String formattedDate = sdf.format(date);
-		return formattedDate;
-	}
 }
