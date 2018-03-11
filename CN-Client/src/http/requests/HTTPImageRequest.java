@@ -25,11 +25,11 @@ public class HTTPImageRequest extends HTTPRequest{
 			inputStream = clientSocket.getInputStream();
 			return new HTTPTextResponse(request, inputStream);
 		} else if (request.getPath().endsWith("png")) {
-			createHeader("text/png", request);
+			createHeader("image/png", request);
 			inputStream = clientSocket.getInputStream();
 			return new HTTPImageResponse(request, inputStream);
 		} else if (request.getPath().endsWith("jpg")) {
-			createHeader("text/jpg", request);
+			createHeader("image/jpg", request);
 			inputStream = clientSocket.getInputStream();
 			return new HTTPImageResponse(request, inputStream);
 		}else {
