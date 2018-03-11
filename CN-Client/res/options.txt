@@ -1,0 +1,6 @@
+GET: A client can use the GET request to get a web resource from the server.
+HEAD: A client can use the HEAD request to get the header that a GET request would have obtained.
+POST: Used to post data up to the web server.
+PUT: Ask the server to store the data.
+DELETE: Ask the server to delete the data.
+OPTIONS: Ask the server to return the list of request methods it supports.

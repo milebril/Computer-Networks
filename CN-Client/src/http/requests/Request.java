@@ -9,7 +9,7 @@ public class Request {
 	
 	//Used to check whether a valid commando is passed
 	private String[]  validCommandos = new String[] {
-			"GET", "HEAD", "POST", "PUT", "GETCOFFEE"
+			"GET", "HEAD", "POST", "PUT", "GETCOFFEE", "OPTIONS", "DELETE"
 	};
 	
 	//URL stuff

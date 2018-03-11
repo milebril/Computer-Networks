@@ -41,7 +41,7 @@ public class HTTPImageResponse extends HTTPResponse {
 		//Write the Image
 		try {
 			File f;	
-			if (path.length() > 0) {
+			if (request.getPath().length() > 0) {
 				f = new File ("res/" + request.getPath());
 				System.out.println("Hier");
 			} else {

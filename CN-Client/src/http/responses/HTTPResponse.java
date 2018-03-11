@@ -60,7 +60,8 @@ public class HTTPResponse {
 			    inputStream.read(); //Skip LF
 			    
 			    headerString = new String(Arrays.copyOfRange(headerLine, 0, counter));
-			    System.out.println(headerString);
+			    header.add(headerString);
+			    //System.out.println(headerString);
 			} while (headerString.length() != 0);
 		} catch (IOException e) {
 			e.printStackTrace();

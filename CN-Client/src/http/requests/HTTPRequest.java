@@ -48,6 +48,12 @@ public class HTTPRequest {
 		case "GETCOFFEE":
 			httpResponse = HTTPGetCoffeeRequest.getGetCoffeeRequest(request);
 			break;
+		case "OPTIONS":
+			httpResponse = HTTPOptionsRequest.getOptionsRequest(request);
+			break;
+		case "DELETE":
+			httpResponse = HTTPDeleteRequest.getDeleteRequest(request);
+			break;
 		}
 	}
 	

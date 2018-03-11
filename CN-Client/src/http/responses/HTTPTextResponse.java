@@ -24,20 +24,6 @@ public class HTTPTextResponse extends HTTPResponse {
 
 	private void makeBody() {
 		try {
-//			BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-//	        String line;             
-//	        File HTMLfile = new File("res/index.html");
-//		    BufferedWriter HTMLwriter = new BufferedWriter(new FileWriter(HTMLfile));
-//	
-//	        while ((line = reader.readLine()) != null) {
-//	            HTMLwriter.write(line);
-//	            System.out.println(line);
-//	            HTMLwriter.newLine();
-//	        }
-//	        
-//	        HTMLwriter.close();
-			
-			//Write the Image
 			File f;
 			if (request.getPath().endsWith("css")) {
 				int removeLenght = request.getPath().split("/")[request.getPath().split("/").length-1].length();
