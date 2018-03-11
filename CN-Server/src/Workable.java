@@ -156,11 +156,40 @@ public class Workable implements Runnable {
 						response.flush();
 					}
 					
+					
+					
+					else if(command.equals("GETCOFFEE")) {
+						this.size = (int) new File("../res/img/teapot.png").length();
+						head.setHeader(418, filetype,this.size);
+						
+						OutputStream out = clientSocket.getOutputStream();
+						FileInputStream fis = new FileInputStream(new File("../res/img/teapot.png"));
+						
+						char[] c = head.getHeader().toString().toCharArray();
+						for (int i = 0; i < c.length; i ++) {
+							out.write((byte) c[i]);
+						}
+						
+						byte[] b = new byte[64 * 1024];
+					    int d = 0;
+					    do {
+					    		d = fis.read(b);
+						    if (d != -1) {
+						    		out.write(b, 0, d);
+					   		}
+					    } while(d != -1);
+					    
+					    out.close();
+					    fis.close();
+					    
+						System.out.println(head);
+					}
+					
 				
 				
 					//Wrong method
 					else if (!command.equals("GET") ||  !command.equals("PUT") ||  !command.equals("POST") ||  !command.equals("HEAD") ||  !command.equals("OPTIONS") ||  
-							!command.equals("DELETE")) {				
+							!command.equals("DELETE") || !command.equals("GETCOFFEE")) {				
 						head.setHeader(501,filetype,this.size);
 						response.write(head.getHeader().toString());			
 						response.flush();
