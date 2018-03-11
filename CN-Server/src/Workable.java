@@ -48,7 +48,9 @@ public class Workable implements Runnable {
 					requestedString = request.readLine();					
 					header = header + requestedString + "\n";					
 				}
+				System.out.println("--------------------------------------------------------------------------------------------------------------------");
 				System.out.println(header);
+				System.out.println("--------------------------------------------------------------------------------------------------------------------");
 				Header head = new Header();
 				
 					//HEAD command
@@ -81,36 +83,12 @@ public class Workable implements Runnable {
 					//file found and GET command
 					else if (command.equals("GET") &&  (new File("../res" + path).exists())) {			
 						if(filetype.equals("jpg") || filetype.equals("png")) {
-							this.size = (int) new File("../res" + path).length();
-							head.setHeader(200, filetype,this.size);
-							
-							OutputStream out = clientSocket.getOutputStream();
-							FileInputStream fis = new FileInputStream(new File("../res" + path));
-							
-							char[] c = head.getHeader().toString().toCharArray();
-							for (int i = 0; i < c.length; i ++) {
-								out.write((byte) c[i]);
-							}
-							
-							byte[] b = new byte[64 * 1024];
-						    int d = 0;
-						    do {
-						    		d = fis.read(b);
-							    if (d != -1) {
-							    		out.write(b, 0, d);
-						   		}
-						    } while(d != -1);
-						    
-						    out.close();
-						    fis.close();
-						    
-							System.out.println(head);
+							sendImage(new File("../res" + path), head, filetype, 200);
 						}else {
 							head.setHeader(200, filetype,this.size);
 							response.write(head.getHeader().toString());
 							File HTMLfile = new File("../res" + path);		
 							response.write(HtmlToString(HTMLfile));
-							System.out.println(head);
 						}	
 						
 										
@@ -157,32 +135,9 @@ public class Workable implements Runnable {
 					}
 					
 					
-					
+					//GETCOFFEE command
 					else if(command.equals("GETCOFFEE")) {
-						this.size = (int) new File("../res/img/teapot.png").length();
-						head.setHeader(418, filetype,this.size);
-						
-						OutputStream out = clientSocket.getOutputStream();
-						FileInputStream fis = new FileInputStream(new File("../res/img/teapot.png"));
-						
-						char[] c = head.getHeader().toString().toCharArray();
-						for (int i = 0; i < c.length; i ++) {
-							out.write((byte) c[i]);
-						}
-						
-						byte[] b = new byte[64 * 1024];
-					    int d = 0;
-					    do {
-					    		d = fis.read(b);
-						    if (d != -1) {
-						    		out.write(b, 0, d);
-					   		}
-					    } while(d != -1);
-					    
-					    out.close();
-					    fis.close();
-					    
-						System.out.println(head);
+						sendImage(new File("../res/img/teapot.png"), head, filetype, 418);
 					}
 					
 				
@@ -213,15 +168,44 @@ public class Workable implements Runnable {
 	        	try {
 	        	Header head = new Header();
 	        	System.out.println(Thread.currentThread().getName());
-				BufferedWriter response = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));								
-				head.setHeader(500,"",this.size);
-				response.write(head.getHeader().toString());			
-				response.flush();
-				response.close();
+	        	sendImage(new File("../res/img/monkey.jpg"), head, "jpg", 500);
 	        	}catch(Exception e) {
 	        		
 	        	}
 	        }return;	 
+	}
+	
+	/**
+	 * sends image to client in bytes
+	 * @param file
+	 * @param head
+	 * @param filetype
+	 * @param code
+	 * @throws IOException
+	 */
+	public void sendImage(File file, Header head, String filetype, int code) throws IOException {
+		this.size = (int) file.length();
+		head.setHeader(code, filetype,this.size);
+		
+		OutputStream out = clientSocket.getOutputStream();
+		FileInputStream fis = new FileInputStream(file);
+		
+		char[] c = head.getHeader().toString().toCharArray();
+		for (int i = 0; i < c.length; i ++) {
+			out.write((byte) c[i]);
+		}
+		
+		byte[] b = new byte[64 * 1024];
+	    int d = 0;
+	    do {
+	    		d = fis.read(b);
+		    if (d != -1) {
+		    		out.write(b, 0, d);
+	   		}
+	    } while(d != -1);
+	    
+	    out.close();
+	    fis.close();
 	}
 	
 	/**
@@ -239,7 +223,7 @@ public class Workable implements Runnable {
 			bodyWriter.close();
 			return 200;
 		} catch (IOException ex) {
-			return 304; //when it is not possible to write to the file, file must me modified
+			return 304; //when it is not possible to write to the file, file must have been modified
 		}
 		
 	}
@@ -257,10 +241,9 @@ public class Workable implements Runnable {
 			bodyWriter = new BufferedWriter(new FileWriter(file));
 			bodyWriter.write(body);
 			bodyWriter.close();
-			System.out.println("written to server");
 			return 200;
 		} catch (IOException ex) {
-			return 304;	//when it is not possible to write to the file, file must me modified
+			return 304;	//when it is not possible to write to the file, file must have been modified
 		}		
 	}
 
