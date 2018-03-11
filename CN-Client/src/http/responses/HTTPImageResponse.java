@@ -32,12 +32,21 @@ public class HTTPImageResponse extends HTTPResponse {
 	private void makeBody() {
 		//Make dirs to put the file in the correct location
 		int removeLenght = request.getPath().split("/")[request.getPath().split("/").length-1].length();
-		System.out.println(request.getPath());
-		String path = request.getPath().substring(0, request.getPath().length()-1-removeLenght);
+		String path = "";
+		if (request.getPath().length() > 0) {
+			 path = request.getPath().substring(0, request.getPath().length()-1-removeLenght);
+		}
 		new File("res/" + path).mkdirs();
+		
 		//Write the Image
 		try {
-			File f = new File ("res/" + request.getPath());
+			File f;	
+			if (path.length() > 0) {
+				f = new File ("res/" + request.getPath());
+				System.out.println("Hier");
+			} else {
+				f = new File ("res/response.png");
+			}
 			f.createNewFile();
 			
 			FileOutputStream out = new FileOutputStream(f);

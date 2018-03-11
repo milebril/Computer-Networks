@@ -37,7 +37,7 @@ public class HTTPRequest {
 			httpResponse = HTTPHeadRequest.getHeadRequest(request);
 			break;
 		case "GET":
-			httpResponse = HTTPImageRequest.getImageRequest(request);
+			httpResponse = HTTPGetRequest.getImageRequest(request);
 			break;
 		case "PUT":
 			httpResponse = HTTPPutRequest.getPutRequest(request);
@@ -63,11 +63,14 @@ public class HTTPRequest {
 		OutputStream output = clientSocket.getOutputStream();
 		PrintWriter writer = new PrintWriter(output, true);
 		
-		System.out.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1\r");
-		if (request.getPath().startsWith("/"))
+		
+		if (request.getPath().startsWith("/")) {
+			System.out.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1\r");
 			writer.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1\r");
-		else
+		} else {
+			System.out.println(request.getCommand() + " /" + request.getPath() + " HTTP/1.1\r");
 			writer.println(request.getCommand() + " /" + request.getPath() + " HTTP/1.1\r");
+		}
 		writer.println("Host: " + request.getURI() + ":" + request.getPort() +"\r");
 		writer.println("Accept: " + type + "\r");
 		writer.println("Connection: close\r");

@@ -7,7 +7,7 @@ import http.responses.HTTPImageResponse;
 import http.responses.HTTPResponse;
 import http.responses.HTTPTextResponse;
 
-public class HTTPImageRequest extends HTTPRequest{
+public class HTTPGetRequest extends HTTPRequest{
 	
 	/**
 	 * Handels the correct get type
