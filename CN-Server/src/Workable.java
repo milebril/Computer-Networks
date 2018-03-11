@@ -127,11 +127,11 @@ public class Workable implements Runnable {
 					}
 								
 					//DELETE command and file found
-					else if (command.equals("DELETE") &&  (new File("../res" + path).exists())) {				
-						try {
+					else if (command.equals("DELETE")) {				
+						if(new File("../res" + path).exists()) {
 							new File("../res" + path).delete();
 							head.setHeader(200,filetype,this.size);
-						} catch(Exception er) {
+						}else{
 							head.setHeader(404,filetype,this.size);
 						}
 						response.write(head.getHeader().toString());			
