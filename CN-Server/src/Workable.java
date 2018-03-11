@@ -3,14 +3,15 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -34,8 +35,7 @@ public class Workable implements Runnable {
 		 try {
 		 	 	System.out.println(Thread.currentThread().getName()); //prints out the current thread
 			 	BufferedReader request = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
-				BufferedWriter response = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));
-				
+				BufferedWriter response = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));				
 				String requestedString = request.readLine(); 
 				String header = requestedString + "\n";								
 				String path = "";
@@ -45,9 +45,9 @@ public class Workable implements Runnable {
 				if(path.equals("/"))path = "/index.html";  // change / to /index.html								
 				if(requestedString.contains(".") && !path.isEmpty()) filetype = path.substring(path.lastIndexOf("." ) + 1); //the type of the file
 				
-				String command = requestedString.split(" ")[0];	//GET,PUT,HEAD,POST command	
+				String command = requestedString.split(" ")[0];	//GET,PUT,HEAD,POST,DELETE,OPTIONS command	
 				
-				//input the client
+				//input from client
 				while(!requestedString.equals("")) {
 					requestedString = request.readLine();					
 					header = header + requestedString + "\n";					
@@ -55,128 +55,148 @@ public class Workable implements Runnable {
 				System.out.println(header);
 				
 				
-				//file found and HEAD command
-				if(command.equals("HEAD") &&  (new File("../res" + path).exists())) {
-					StringBuilder head = getHeader(200,filetype);
-					response.write(head.toString());
-					response.write(head.toString());
-					response.flush();
-				}
-				
-				
-				
-				//POST command
-				else if(command.equals("POST")) {
-					String tempbody = request.readLine();
-					String body = tempbody + "\n";
-					while(!tempbody.isEmpty()) {
-						tempbody = request.readLine();
-						body = body + tempbody + "\n";
-					}
-					StringBuilder head = getHeader(addToServer(body, path),filetype);
-					response.write(head.toString());
-					response.flush();
-				}
-				
-				
-				
-				//PUT command
-				else if(command.equals("PUT")) {
-					String tempbody = request.readLine();
-					String body = tempbody + "\n";				
-					while(!tempbody.isEmpty()) {
-						tempbody = request.readLine();
-						body = body + tempbody + "\n";
-					}
-					StringBuilder head = getHeader(writeToServer(body, path),"");
-					response.write(head.toString());
-					response.flush();
-				}
-				
-				
-				
-				//file found and GET command
-				else if (command.equals("GET") &&  (new File("../res" + path).exists())) {			
-					if(filetype.equals("jpg") || filetype.equals("png")) {
-						BufferedImage image = ImageIO.read(new File("../res" + path));
-						ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-				        ImageIO.write(image, filetype, byteArrayOutputStream);
-				        byte[] imageInBytes = byteArrayOutputStream.toByteArray();		
-						this.size = imageInBytes.length;
-						StringBuilder head = getHeader(200,filetype);
+					//HEAD command
+					if(command.equals("HEAD")) {
+						StringBuilder head = new StringBuilder();
+						if (new File("../res" + path).exists()) head = getHeader(200,filetype); //file found
+						else head = getHeader(404,filetype); // file not found
 						response.write(head.toString());
-						String test = new String(imageInBytes, "UTF-8");
-						response.write(test);
-						byteArrayOutputStream.close();
-						System.out.println(head);
-					}else {
-						StringBuilder head = getHeader(200,filetype);
 						response.write(head.toString());
-						File HTMLfile = new File("../res" + path);		
-						response.write(HtmlToString(HTMLfile));
-						System.out.println(head);
-					}	
-					
-									
-					response.flush();
-				}
-				
-				
-				
-				//file not found
-				else if (command.equals("GET") &&  (!new File("../res" + path).exists())) {				
-					StringBuilder head = getHeader(404,filetype);
-					response.write(head.toString());			
-					response.flush();
-				}
-				
-				
-				
-				//DELETE command and file found
-				else if (command.equals("DELETE") &&  (new File("../res" + path).exists())) {				
-					StringBuilder head = new StringBuilder();
-					try {
-						new File("../res" + path).delete();
-						head = getHeader(200,filetype);
-					} catch(Exception er) {
-						head = getHeader(404,filetype);
+						response.flush();
 					}
-					response.write(head.toString());			
-					response.flush();
+				
+				
 					
-				}
+					//PUT  and POST command
+					else if(command.equals("PUT") || command.equals("POST")) {
+						String tempbody = request.readLine();
+						String body = tempbody + "\n";				
+						while(!tempbody.isEmpty()) {
+							tempbody = request.readLine();
+							body = body + tempbody + "\n";
+						}
+						StringBuilder head = new StringBuilder();
+						if(command.equals("PUT"))head = getHeader(writeToServer(body, path),filetype); //PUT
+						else head = getHeader(addToServer(body, path),filetype); // POST
+						response.write(head.toString());
+						response.flush();
+					}
 				
 				
 				
-				//OPTIONS returns the list of request methods supported
-				else if(command.equals("OPTIONS")) {
-					StringBuilder head = getHeader(201, filetype);
-					response.write(head.toString());
-					StringBuilder options = new StringBuilder();
-					options.append("GET: A client can use the GET request to get a web resource from the server.\r\n");
-					options.append("HEAD: A client can use the HEAD request to get the header that a GET request would have obtained.\r\n");
-					options.append("POST: Used to post data up to the web server.\r\n");
-					options.append("PUT: Ask the server to store the data.\r\n");
-					options.append("DELETE: Ask the server to delete the data.\r\n");
-					options.append("OPTIONS: Ask the server to return the list of request methods it supports.\r\n");
-					response.write(options.toString());
-					response.flush();
-				}
+					//file found and GET command
+					else if (command.equals("GET") &&  (new File("../res" + path).exists())) {			
+						if(filetype.equals("jpg") || filetype.equals("png")) {
+							this.size = (int) new File("../res" + path).length();
+							StringBuilder head = getHeader(200, filetype);
+							
+							OutputStream out = clientSocket.getOutputStream();
+							FileInputStream fis = new FileInputStream(new File("../res" + path));
+							
+							char[] c = head.toString().toCharArray();
+							for (int i = 0; i < c.length; i ++) {
+								out.write((byte) c[i]);
+							}
+							
+							byte[] b = new byte[64 * 1024];
+						    int d = 0;
+						    do {
+						    		d = fis.read(b);
+							    if (d != -1) {
+							    		out.write(b, 0, d);
+						   		}
+						    } while(d != -1);
+						    
+						    out.close();
+						    fis.close();
+						    
+							System.out.println(head);
+						}else {
+							StringBuilder head = getHeader(200,filetype);
+							response.write(head.toString());
+							File HTMLfile = new File("../res" + path);		
+							response.write(HtmlToString(HTMLfile));
+							System.out.println(head);
+						}	
+						
+										
+						response.flush();
+					}
+					
+					
+					
+					//file not found
+					else if (command.equals("GET") &&  (!new File("../res" + path).exists())) {				
+						StringBuilder head = getHeader(404,filetype);
+						response.write(head.toString());			
+						response.flush();
+					}
+				
+				
+					//file not found
+					else if (command.equals("GET") &&  (!new File("../res" + path).exists())) {				
+						StringBuilder head = getHeader(404,filetype);
+						response.write(head.toString());			
+						response.flush();
+					}
+					
+					
+					
+					//DELETE command and file found
+					else if (command.equals("DELETE") &&  (new File("../res" + path).exists())) {				
+						StringBuilder head = new StringBuilder();
+						try {
+							new File("../res" + path).delete();
+							head = getHeader(200,filetype);
+						} catch(Exception er) {
+							head = getHeader(404,filetype);
+						}
+						response.write(head.toString());			
+						response.flush();
+						
+					}
 				
 				
 				
-				//client did something wrong
-				else {
-					StringBuilder head = getHeader(400,filetype);
-					response.write(head.toString());			
-					response.flush();
-				}
+					//OPTIONS returns the list of request methods supported
+					else if(command.equals("OPTIONS")) {
+						StringBuilder head = getHeader(201, filetype);
+						response.write(head.toString());
+						StringBuilder options = new StringBuilder();
+						options.append("GET: A client can use the GET request to get a web resource from the server.\r\n");
+						options.append("HEAD: A client can use the HEAD request to get the header that a GET request would have obtained.\r\n");
+						options.append("POST: Used to post data up to the web server.\r\n");
+						options.append("PUT: Ask the server to store the data.\r\n");
+						options.append("DELETE: Ask the server to delete the data.\r\n");
+						options.append("OPTIONS: Ask the server to return the list of request methods it supports.\r\n");
+						response.write(options.toString());
+						response.flush();
+					}
+					
 				
-				request.close();
-				response.close();
+				
+					//Wrong method
+					else if (!command.equals("GET") ||  !command.equals("PUT") ||  !command.equals("POST") ||  !command.equals("HEAD") ||  !command.equals("OPTIONS") ||  
+							!command.equals("DELETE")) {				
+						StringBuilder head = getHeader(501,filetype);
+						response.write(head.toString());			
+						response.flush();
+					}
+					
+					
+					
+					//client did something wrong
+					else {
+						StringBuilder head = getHeader(400,filetype);
+						response.write(head.toString());			
+						response.flush();
+					}
+					
+					request.close();
+					response.close();
 				
 				
-			//when everything fails consider it an internal error
+			//when everything fails consider it an internal server error
 	        } catch (IOException ex) { 
 	        	try {
 	        	System.out.println(Thread.currentThread().getName());
@@ -206,7 +226,7 @@ public class Workable implements Runnable {
 			bodyWriter.close();
 			return 200;
 		} catch (IOException ex) {
-			return 304;
+			return 304; //when it is not possible to write to the file, file must me modified
 		}
 		
 	}
@@ -227,7 +247,7 @@ public class Workable implements Runnable {
 			System.out.println("written to server");
 			return 200;
 		} catch (IOException ex) {
-			return 304;
+			return 304;	//when it is not possible to write to the file, file must me modified
 		}		
 	}
 
@@ -252,7 +272,7 @@ public class Workable implements Runnable {
 	}	
 	
 	/**
-	 * returns the response header 
+	 * returns the response corresponding header 
 	 * @param code
 	 * @return response header
 	 */
@@ -305,6 +325,11 @@ public class Workable implements Runnable {
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
 			head.append("\r\n");
+		case 501:
+			head.append("HTTP/1.1 501 Method Not Implemented\r\n");
+			head.append("Date:" + getTimeStamp() + "\r\n");
+			head.append("Server:localhost\r\n");
+			head.append("\r\n");	
 		}return head;
 	}
 
