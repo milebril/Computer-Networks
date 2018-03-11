@@ -77,6 +77,7 @@ public class Header {
 			head.append("HTTP/1.1 418 I'm a teapot\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
+			head.append("X-Barista: the server refuses to brew coffee because it is a teapo");
 			head.append("\r\n");		
 		}this.header = head;
 	}
