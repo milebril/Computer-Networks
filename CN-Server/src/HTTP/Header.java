@@ -62,6 +62,7 @@ public class Header {
 			head.append("HTTP/1.1 500 Internal Server Error\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
+			head.append("X-Server: yea, we messed up, sorry");
 			head.append("\r\n");
 		case 400:
 			head.append("HTTP/1.1 400 Bad Request\r\n");
@@ -77,6 +78,7 @@ public class Header {
 			head.append("HTTP/1.1 418 I'm a teapot\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
+			head.append("X-Barista: the server refuses to brew coffee because it is a teapot");
 			head.append("\r\n");		
 		}this.header = head;
 	}
