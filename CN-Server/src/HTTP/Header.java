@@ -53,33 +53,39 @@ public class Header {
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
 			head.append("\r\n");
+			break;
 		case 304:
 			head.append("HTTP/1.1 304 Not Modified\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
 			head.append("\r\n");
+			break;
 		case 500:
 			head.append("HTTP/1.1 500 Internal Server Error\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
-			head.append("X-Server: yea, we messed up, sorry");
+			head.append("X-Server: yea, we messed up, sorry\r\n");
 			head.append("\r\n");
+			break;
 		case 400:
 			head.append("HTTP/1.1 400 Bad Request\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
 			head.append("\r\n");
+			break;
 		case 501:
 			head.append("HTTP/1.1 501 Method Not Implemented\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
-			head.append("\r\n");	
+			head.append("\r\n");
+			break;
 		case 418:
 			head.append("HTTP/1.1 418 I'm a teapot\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
-			head.append("X-Barista: the server refuses to brew coffee because it is a teapot");
-			head.append("\r\n");		
+			head.append("X-Barista: the server refuses to brew coffee because it is a teapot\r\n");
+			head.append("\r\n");	
+			break;
 		}this.header = head;
 	}
 	

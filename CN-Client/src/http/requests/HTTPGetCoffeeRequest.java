@@ -20,5 +20,4 @@ public class HTTPGetCoffeeRequest extends HTTPRequest{
 		inputStream = clientSocket.getInputStream();
 		return new HTTPImageResponse(request, inputStream);
 	}
-	
 }
