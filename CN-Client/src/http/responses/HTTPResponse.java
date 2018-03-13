@@ -61,7 +61,6 @@ public class HTTPResponse {
 			    
 			    headerString = new String(Arrays.copyOfRange(headerLine, 0, counter));
 			    header.add(headerString);
-			    //System.out.println(headerString);
 			} while (headerString.length() != 0);
 		} catch (IOException e) {
 			e.printStackTrace();
