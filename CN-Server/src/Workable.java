@@ -17,6 +17,7 @@ public class Workable implements Runnable {
 
 	Socket clientSocket = null;
 	private int size = 0;
+	boolean close = false;
 	
 	/**
 	 * constructor
@@ -28,16 +29,17 @@ public class Workable implements Runnable {
 
 	@Override
 	public void run() {
-		 try {
-		 	 	System.out.println(Thread.currentThread().getName()); //prints out the current thread
+		try {
+		 	 	System.out.println(Thread.currentThread().getName()); //prints out the current thread		 	 	
 			 	BufferedReader request = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
 				BufferedWriter response = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));				
-				String requestedString = request.readLine(); 
+				String requestedString = request.readLine(); // First line of the request
 				String header = requestedString + "\n";								
 				String path = "";
 				String filetype = "";
 				
-				if(!requestedString.isEmpty()) path = requestedString.split(" ")[1].substring(0); //path to file
+				if(requestedString.isEmpty()) clientSocket.close(); //close connection to client when request is empty.
+				else path = requestedString.split(" ")[1].substring(0); //path to file
 				if(path.equals("/"))path = "/index.html";  // change / to /index.html								
 				if(requestedString.contains(".") && !path.isEmpty()) filetype = path.substring(path.lastIndexOf("." ) + 1); //the type of the file
 				
@@ -45,21 +47,19 @@ public class Workable implements Runnable {
 				
 				//input from client
 				while(!requestedString.equals("")) {
-					requestedString = request.readLine();					
+					requestedString = request.readLine();
+					if (requestedString.equals("Connection: Close")) close = true;
 					header = header + requestedString + "\n";					
-				}
-				System.out.println("--------------------------------------------------------------------------------------------------------------------");
-				System.out.println(header);
-				System.out.println("--------------------------------------------------------------------------------------------------------------------");
+				}System.out.println(header);
 				Header head = new Header();
 				
 					//HEAD command
 					if(command.equals("HEAD")) {
 						if (new File("../res" + path).exists()) head.setHeader(200,filetype,this.size); //file found
 						else head.setHeader(404,filetype,this.size); // file not found
+						
 						response.write(head.getHeader().toString());
 						response.write(head.getHeader().toString());
-						response.flush();
 					}
 				
 				
@@ -75,7 +75,6 @@ public class Workable implements Runnable {
 						if(command.equals("PUT"))head.setHeader(writeToServer(body, path),filetype,this.size); //PUT
 						else head.setHeader(addToServer(body, path),filetype,this.size); // POST
 						response.write(head.getHeader().toString());
-						response.flush();
 					}
 				
 				
@@ -85,14 +84,12 @@ public class Workable implements Runnable {
 						if(filetype.equals("jpg") || filetype.equals("png")) {
 							sendImage(new File("../res" + path), head, filetype, 200);
 						}else {
+							File HTMLfile = new File("../res" + path);	
+							this.size = (int) HTMLfile.length();
 							head.setHeader(200, filetype,this.size);
 							response.write(head.getHeader().toString());
-							File HTMLfile = new File("../res" + path);		
 							response.write(HtmlToString(HTMLfile));
 						}	
-						
-										
-						response.flush();
 					}
 					
 					
@@ -101,7 +98,6 @@ public class Workable implements Runnable {
 					else if (command.equals("GET") &&  (!new File("../res" + path).exists())) {				
 						head.setHeader(404,filetype,this.size);
 						response.write(head.getHeader().toString());			
-						response.flush();
 					}
 								
 					//DELETE command and file found
@@ -113,8 +109,6 @@ public class Workable implements Runnable {
 							head.setHeader(404,filetype,this.size);
 						}
 						response.write(head.getHeader().toString());			
-						response.flush();
-						
 					}
 				
 				
@@ -123,6 +117,7 @@ public class Workable implements Runnable {
 					else if(command.equals("OPTIONS")) {
 						head.setHeader(201,filetype,this.size);
 						response.write(head.getHeader().toString());
+						
 						StringBuilder options = new StringBuilder();
 						options.append("GET: A client can use the GET request to get a web resource from the server.\r\n");
 						options.append("HEAD: A client can use the HEAD request to get the header that a GET request would have obtained.\r\n");
@@ -131,7 +126,6 @@ public class Workable implements Runnable {
 						options.append("DELETE: Ask the server to delete the data.\r\n");
 						options.append("OPTIONS: Ask the server to return the list of request methods it supports.\r\n");
 						response.write(options.toString());
-						response.flush();
 					}
 					
 					
@@ -147,7 +141,6 @@ public class Workable implements Runnable {
 							!command.equals("DELETE") || !command.equals("GETCOFFEE")) {				
 						head.setHeader(501,filetype,this.size);
 						response.write(head.getHeader().toString());			
-						response.flush();
 					}
 					
 					
@@ -156,19 +149,18 @@ public class Workable implements Runnable {
 					else {
 						head.setHeader(400,filetype,this.size);
 						response.write(head.getHeader().toString());			
-						response.flush();
 					}
-					
+					response.flush();					
 					request.close();
-					response.close();
-				
+					response.close();	
+
 				
 			//when everything fails consider it an internal server error
 	        } catch (IOException ex) { 
 	        	try {
-	        	Header head = new Header();
-	        	System.out.println(Thread.currentThread().getName());
-	        	sendImage(new File("../res/img/monkey.jpg"), head, "jpg", 500);
+		        	Header head = new Header();
+		        	System.out.println(Thread.currentThread().getName());
+		        	sendImage(new File("../res/img/monkey.jpg"), head, "jpg", 500);
 	        	}catch(Exception e) {
 	        		
 	        	}
@@ -203,9 +195,10 @@ public class Workable implements Runnable {
 		    		out.write(b, 0, d);
 	   		}
 	    } while(d != -1);
-	    
-	    out.close();
-	    fis.close();
+//	    if (close) {
+	    	out.close();
+	    	fis.close();
+//	    }	
 	}
 	
 	/**
