@@ -66,4 +66,15 @@ public class HTTPResponse {
 			e.printStackTrace();
 		}
 	}
+	
+	protected long getHeaderContentLenght() {
+		Long l = (long) 0;
+		for (String s : header) {
+			if (s.startsWith("Content-Length")) {
+				String[] split = s.split(":");
+				l = Long.valueOf(split[1].substring(1, split[1].length()));
+			}
+		}
+		return l;
+	}
 }

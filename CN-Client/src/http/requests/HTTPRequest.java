@@ -15,25 +15,26 @@ import http.responses.HTTPResponse;
 import http.responses.HTTPTextResponse;
 
 public class HTTPRequest {
-	
+
 	protected static Socket clientSocket;
 	protected static InputStream inputStream;
 	protected static Request request;
-	
+
 	protected HTTPResponse httpResponse;
-	
+
 	public HTTPRequest() {
-		
+
 	}
-	
+
 	/**
 	 * Depending on what command is given, different Requests will be made
+	 * 
 	 * @param request
 	 * @throws IOException
 	 */
 	public HTTPRequest(Request request) throws IOException {
 		switch (request.getCommand()) {
-		case "HEAD": 
+		case "HEAD":
 			httpResponse = HTTPHeadRequest.getHeadRequest(request);
 			break;
 		case "GET":
@@ -56,11 +57,14 @@ public class HTTPRequest {
 			break;
 		}
 	}
-	
+
 	/**
 	 * Create A header to send to the Server
-	 * @param type The type of files to Accept
-	 * @param request The Information about a request
+	 * 
+	 * @param type
+	 *            The type of files to Accept
+	 * @param request
+	 *            The Information about a request
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
@@ -68,8 +72,7 @@ public class HTTPRequest {
 		clientSocket = new Socket(request.getURI(), request.getPort());
 		OutputStream output = clientSocket.getOutputStream();
 		PrintWriter writer = new PrintWriter(output, true);
-		
-		
+
 		if (request.getPath().startsWith("/")) {
 			System.out.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1\r");
 			writer.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1\r");
@@ -77,18 +80,21 @@ public class HTTPRequest {
 			System.out.println(request.getCommand() + " /" + request.getPath() + " HTTP/1.1\r");
 			writer.println(request.getCommand() + " /" + request.getPath() + " HTTP/1.1\r");
 		}
-		writer.println("Host: " + request.getURI() + ":" + request.getPort() +"\r");
+		writer.println("Host: " + request.getURI() + ":" + request.getPort() + "\r");
 		writer.println("Accept: " + type + "\r");
-		writer.println("Connection: close\r");
+		writer.println("Connection: Keep-Alive\r");
 		writer.println("\r");
-		
+
 		return clientSocket;
 	}
-	
+
 	/**
 	 * Creating the body of a PUT or POST message, ending with a blank line
-	 * @param socket the socket to send data through
-	 * @param toSend the string that needs to be the body
+	 * 
+	 * @param socket
+	 *            the socket to send data through
+	 * @param toSend
+	 *            the string that needs to be the body
 	 * @throws IOException
 	 */
 	protected static void createTextMessageBody(Socket socket, String toSend) throws IOException {
@@ -97,27 +103,29 @@ public class HTTPRequest {
 		writer.println(toSend);
 		writer.println("\r");
 	}
-	
+
 	/**
-	 * Reads the given HTML file and appends a String such that the string contains the whole file to send
+	 * Reads the given HTML file and appends a String such that the string contains
+	 * the whole file to send
+	 * 
 	 * @param file
 	 * @return
 	 */
 	protected static String HtmlToString(File file) {
 		StringBuilder contentBuilder = new StringBuilder();
 		try {
-		    BufferedReader in = new BufferedReader(new FileReader(file));
-		    String str;
-		    while ((str = in.readLine()) != null) {
-		        contentBuilder.append(str + "\r\n");
-		    }
-		    in.close();
+			BufferedReader in = new BufferedReader(new FileReader(file));
+			String str;
+			while ((str = in.readLine()) != null) {
+				contentBuilder.append(str + "\r\n");
+			}
+			in.close();
 		} catch (IOException e) {
 		}
 		String content = contentBuilder.toString();
 		return content;
-	}	
-	
+	}
+
 	public HTTPResponse getResponse() {
 		return httpResponse;
 	}
