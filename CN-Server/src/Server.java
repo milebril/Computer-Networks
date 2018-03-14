@@ -28,10 +28,8 @@ public class Server {
 		Socket client = null;
 		while(true) {
 			try {
-					client = this.serverSocket.accept();
-					System.out.println("Connected client:" + client.getInetAddress().getCanonicalHostName());
-
-								
+				client = this.serverSocket.accept();
+				System.out.println("Connected client:" + client.getInetAddress());								
 			}catch(IOException ex) {
 				System.out.println("server has stopped");
 				break;
