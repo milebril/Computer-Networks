@@ -58,6 +58,7 @@ public class Client{
 			for (Element e : doc.select("link")) {
 				if (e.attr("rel").equals("stylesheet")) {
 					//String href = e.attr("href");
+					System.out.println(request.getURL().toString() + "/" + e.attr("href"));
 					Request imgRequest = new Request("GET", 
 							request.getURL().toString() + "/" + e.attr("href")
 							, request.getPort()); //Set up a new Request

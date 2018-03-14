@@ -82,7 +82,7 @@ public class HTTPRequest {
 		}
 		writer.println("Host: " + request.getURI() + ":" + request.getPort() + "\r");
 		writer.println("Accept: " + type + "\r");
-		writer.println("Connection: close\r");
+		writer.println("Connection: Keep-Alive\r");
 		writer.println("\r");
 
 		return clientSocket;
