@@ -2,6 +2,7 @@ package HTTP;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class Header {
 
@@ -87,6 +88,7 @@ public class Header {
 			head.append("\r\n");	
 			break;
 		}this.header = head;
+		System.out.println(head);
 	}
 	
 	
@@ -105,7 +107,8 @@ public class Header {
 	 */
 	private static String getTimeStamp() {
 		Date date = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
+		SimpleDateFormat sdf = new SimpleDateFormat(" EEE, dd MMM yyyy HH:mm:ss z");
+		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 		String formattedDate = sdf.format(date);
 		return formattedDate;
 	}

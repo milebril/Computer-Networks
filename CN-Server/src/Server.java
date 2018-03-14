@@ -29,7 +29,8 @@ public class Server {
 		while(true) {
 			try {
 				client = this.serverSocket.accept();
-				System.out.println("Connected client:" + client.getInetAddress());								
+				client.setKeepAlive(true);
+				System.out.println("Connected client:" + client.getInetAddress());	
 			}catch(IOException ex) {
 				System.out.println("server has stopped");
 				break;
@@ -39,4 +40,3 @@ public class Server {
 		}
 	}
 }
-	
