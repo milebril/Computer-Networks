@@ -2,6 +2,7 @@ package HTTP;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class Header {
 
@@ -36,17 +37,17 @@ public class Header {
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
 			head.append("Content-Type: " + filetype);
-			if(type.equals("jpg") || type.equals("png")) head.append("Content-Length: " + size + "\r\n");
-			head.append("Connection: Closed\r\n\r\n");
+			head.append("Content-Length: " + size + "\r\n");
+			head.append("Connection: Keep-Alive\r\n\r\n");
 			break;
 		case 201:
 			head.append("HTTP/1.1 200 OK\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
 			head.append("Content-Type: " + filetype);
-			if(type.equals("jpg") || type.equals("png")) head.append("Content-Length: " + size + "\r\n");
+			head.append("Content-Length: " + size + "\r\n");
 			head.append("Allow: GET, HEAD, POST, OPTIONS, PUT, DELETE\r\n");
-			head.append("Connection: Closed\r\n\r\n");
+			head.append("Connection: Keep-Alive\r\n\r\n");
 			break;	
 		case 404:
 			head.append("HTTP/1.1 404 Not Found\r\n");
@@ -87,6 +88,7 @@ public class Header {
 			head.append("\r\n");	
 			break;
 		}this.header = head;
+		System.out.println(head);
 	}
 	
 	
@@ -105,7 +107,8 @@ public class Header {
 	 */
 	private static String getTimeStamp() {
 		Date date = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
+		SimpleDateFormat sdf = new SimpleDateFormat(" EEE, dd MMM yyyy HH:mm:ss z");
+		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 		String formattedDate = sdf.format(date);
 		return formattedDate;
 	}

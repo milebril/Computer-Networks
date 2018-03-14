@@ -1,11 +1,15 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
 
 	private int serverPort;
 	private ServerSocket serverSocket = null;
+	private ExecutorService threadPool = Executors.newFixedThreadPool(10);
+	private boolean running = true;
 	
 	/**
 	 * constructor
@@ -21,18 +25,18 @@ public class Server {
 		}catch(IOException ex) {
 			throw new RuntimeException("Unable to run server on port" + ex);
 		}
-		
 		Socket client = null;
 		while(true) {
 			try {
 				client = this.serverSocket.accept();
-				System.out.println("Connected client:" + client.getInetAddress().getCanonicalHostName());
-				Thread thread = new Thread(new Workable(client));
-				thread.start();
+				client.setKeepAlive(true);
+				System.out.println("Connected client:" + client.getInetAddress());	
 			}catch(IOException ex) {
 				System.out.println("server has stopped");
+				break;
 			}
+			Workable thread = new Workable(client);
+			this.threadPool.execute(thread);
 		}
 	}
 }
-	
