@@ -188,16 +188,21 @@ public class Workable implements Runnable {
 
 		byte[] b = new byte[64 * 1024];
 		int d = 0;
+		int cd = 0;
 		do {
 			d = fis.read(b);
+
 			if (d != -1) {
+				cd = d;
 				out.write(b, 0, d);
 			}
 		} while (d != -1);
-		// if (close) {
+		
+		if (cd != file.length()) {
+			System.out.println("Fout image ingelezen!");
+		}
 		out.close();
 		fis.close();
-		// }
 	}
 
 	/**
