@@ -68,12 +68,14 @@ public class WriteToClient {
 		Header head = new Header();
 		
 		//the client sends the wrong type of command resulting in an 501 error
-		if (!command.equals("GET") || !command.equals("PUT") || !command.equals("POST")
-				|| !command.equals("HEAD") || !command.equals("OPTIONS") || !command.equals("DELETE")
-				|| !command.equals("GETCOFFEE")) {
-			head.setHeader(501, filetype, 0, null);
-			res.write(head.getHeader().toString());
-		}
+//		if (!command.equals("GET") || !command.equals("PUT") || !command.equals("POST")
+//				|| !command.equals("HEAD") || !command.equals("OPTIONS") || !command.equals("DELETE")
+//				|| !command.equals("GETCOFFEE")) {
+//			System.out.println("METHOD:" + command);
+//			head.setHeader(501, filetype, 0, null);
+//			res.write(head.getHeader().toString());
+//			return;
+//		}
 		
 		//responds according to the given command
 		switch (command) {
@@ -113,7 +115,9 @@ public class WriteToClient {
 			break;	
 		default: // in the default case we consider it the fault of the client
 			head.setHeader(400, filetype, 0, null);
-			res.write(head.getHeader().toString());
+			res.write(head.getHeader().toString()); //TODO Checken uit request header
+//			head.setHeader(501, filetype, 0, null);
+//			res.write(head.getHeader().toString());
 			break;
 		}
 	}
