@@ -68,9 +68,12 @@ public class WriteToClient {
 			break;
 		case "GET":
 			GetRequest GetRequest = new GetRequest(req, path, 0, LastModifiedSince, filetype, head, clientSocket);
-			res.write(GetRequest.getHeader().getHeader().toString());
-			if (GetRequest.getBody() != null)
-				res.write(GetRequest.getBody());
+			System.out.println(GetRequest.getHeader());
+			if (!filetype.equals("jpg") && !filetype.equals("png")) {
+				res.write(GetRequest.getHeader().getHeader().toString());
+				if (GetRequest.getBody() != null)
+					res.write(GetRequest.getBody());
+			}
 			break;
 		case "GETCOFFEE":
 		case "DELETE":

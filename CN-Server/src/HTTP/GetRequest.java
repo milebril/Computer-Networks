@@ -19,7 +19,7 @@ public class GetRequest {
 	}
 
 	public Header getHeader() {
-		return this.header;
+		return header;
 	}
 
 	public GetRequest(BufferedReader request, String path, int size, Date LastModifiedSince, String filetype,
@@ -43,6 +43,7 @@ public class GetRequest {
 			int sizes = (int) HTMLfile.length();
 			head.setHeader(200, filetype, sizes, HTMLfile);
 			this.header = head;
+			System.out.println("LOL: " + this.header.getHeader());
 			this.body = HtmlToString(HTMLfile);
 		}
 		// }
