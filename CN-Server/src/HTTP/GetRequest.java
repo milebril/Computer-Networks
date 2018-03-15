@@ -29,24 +29,22 @@ public class GetRequest {
 			this.header = head;
 			return;
 		}
-		// else if (LastModifiedSince != null) {
-		// if (LastModifiedSince.before(new Date(new File("../res" +
-		// path).lastModified()))) {
-		// head.setHeader(304, filetype, size, new File("../res" + path)); // file found
-		// but not modified
-		// this.header = head;
-		// }else
-		if (filetype.equals("jpg") || filetype.equals("png")) {
-			sendImage(new File("../res" + path), head, filetype, 200, clientSocket);
-		} else {
-			File HTMLfile = new File("../res" + path);
-			int sizes = (int) HTMLfile.length();
-			head.setHeader(200, filetype, sizes, HTMLfile);
-			this.header = head;
-			System.out.println("LOL: " + this.header.getHeader());
-			this.body = HtmlToString(HTMLfile);
-		}
-		// }
+		 else if (LastModifiedSince != null) {
+			 if (LastModifiedSince.before(new Date(new File("../res" + path).lastModified()))) {
+				 head.setHeader(304, filetype, size, new File("../res" + path)); // file found but not modified
+				 this.header = head;
+			 }else 
+				 if (filetype.equals("jpg") || filetype.equals("png")) {
+				 sendImage(new File("../res" + path), head, filetype, 200, clientSocket);
+			 } else {
+				 File HTMLfile = new File("../res" + path);
+				 int sizes = (int) HTMLfile.length();
+				 head.setHeader(200, filetype, sizes, HTMLfile);
+				 this.header = head;
+				 System.out.println("LOL: " + this.header.getHeader());
+				 this.body = HtmlToString(HTMLfile);
+			 }
+		 }
 	}
 
 	/**
