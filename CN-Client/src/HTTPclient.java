@@ -39,7 +39,7 @@ public class HTTPclient {
 		    out.println("Connection: Close");
 		    out.println();
 		    	
-		    File f = new File("../res/output.html");
+		    File f = new File("res/output.html");
 		    BufferedWriter bf = new BufferedWriter(new FileWriter(f));
 		    boolean more = true;
 		    String input;

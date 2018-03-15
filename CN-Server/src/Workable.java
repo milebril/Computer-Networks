@@ -9,6 +9,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import HTTP.Header;
 
@@ -37,23 +40,27 @@ public class Workable implements Runnable {
 			String header = requestedString + "\n";
 			String path = "";
 			String filetype = "";
+//			SimpleDateFormat sdf = new SimpleDateFormat(" EEE, dd MMM yyyy HH:mm:ss z");
 
-			if (requestedString.isEmpty())
+			if (requestedString == null) {
 				clientSocket.close(); // close connection to client when request is empty.
+				return;
+			}
 			else
-				path = requestedString.split(" ")[1].substring(0); // path to file
+				path = requestedString.split(" ")[1].substring(0);
 			if (path.equals("/"))
 				path = "/index.html"; // change / to /index.html
 			if (requestedString.contains(".") && !path.isEmpty())
 				filetype = path.substring(path.lastIndexOf(".") + 1); // the type of the file
 
 			String command = requestedString.split(" ")[0]; // GET,PUT,HEAD,POST,DELETE,OPTIONS command
-
+//			Date modifiedSince =  new Date();
 			// input from client
 			while (!requestedString.equals("")) {
 				requestedString = request.readLine();
 				if (requestedString.equals("Connection: Close"))
 					close = true;
+			//	if (requestedString.startsWith("If-Modified-Since: ")) modifiedSince = sdf.parse(requestedString.substring(requestedString.lastIndexOf(" ") + 1));;
 				header = header + requestedString + "\n";
 			}
 			System.out.println(header);
@@ -62,9 +69,9 @@ public class Workable implements Runnable {
 			// HEAD command
 			if (command.equals("HEAD")) {
 				if (new File("../res" + path).exists())
-					head.setHeader(200, filetype, this.size); // file found
+					head.setHeader(200, filetype, this.size, new File("../res" + path)); // file found
 				else
-					head.setHeader(404, filetype, this.size); // file not found
+					head.setHeader(404, filetype, this.size, null); // file not found
 
 				response.write(head.getHeader().toString());
 				response.write(head.getHeader().toString());
@@ -79,9 +86,9 @@ public class Workable implements Runnable {
 					body = body + tempbody + "\n";
 				}
 				if (command.equals("PUT"))
-					head.setHeader(writeToServer(body, path), filetype, this.size); // PUT
+					head.setHeader(writeToServer(body, path), filetype, this.size, null); // PUT
 				else
-					head.setHeader(addToServer(body, path), filetype, this.size); // POST
+					head.setHeader(addToServer(body, path), filetype, this.size, null); // POST
 				response.write(head.getHeader().toString());
 			}
 
@@ -92,7 +99,7 @@ public class Workable implements Runnable {
 				} else {
 					File HTMLfile = new File("../res" + path);
 					this.size = (int) HTMLfile.length();
-					head.setHeader(200, filetype, this.size);
+					head.setHeader(200, filetype, this.size, new File("../res" + path));
 					response.write(head.getHeader().toString());
 					response.write(HtmlToString(HTMLfile));
 				}
@@ -100,7 +107,7 @@ public class Workable implements Runnable {
 
 			// file not found
 			else if (command.equals("GET") && (!new File("../res" + path).exists())) {
-				head.setHeader(404, filetype, this.size);
+				head.setHeader(404, filetype, this.size, null);
 				response.write(head.getHeader().toString());
 			}
 
@@ -108,16 +115,16 @@ public class Workable implements Runnable {
 			else if (command.equals("DELETE")) {
 				if (new File("../res" + path).exists()) {
 					new File("../res" + path).delete();
-					head.setHeader(200, filetype, this.size);
+					head.setHeader(200, filetype, this.size, null);
 				} else {
-					head.setHeader(404, filetype, this.size);
+					head.setHeader(404, filetype, this.size, null);
 				}
 				response.write(head.getHeader().toString());
 			}
 
 			// OPTIONS returns the list of request methods supported
 			else if (command.equals("OPTIONS")) {
-				head.setHeader(201, filetype, this.size);
+				head.setHeader(201, filetype, this.size, null);
 				response.write(head.getHeader().toString());
 
 				StringBuilder options = new StringBuilder();
@@ -139,13 +146,13 @@ public class Workable implements Runnable {
 			else if (!command.equals("GET") || !command.equals("PUT") || !command.equals("POST")
 					|| !command.equals("HEAD") || !command.equals("OPTIONS") || !command.equals("DELETE")
 					|| !command.equals("GETCOFFEE")) {
-				head.setHeader(501, filetype, this.size);
+				head.setHeader(501, filetype, this.size, null);
 				response.write(head.getHeader().toString());
 			}
 
 			// client did something wrong
 			else {
-				head.setHeader(400, filetype, this.size);
+				head.setHeader(400, filetype, this.size, null);
 				response.write(head.getHeader().toString());
 			}
 			response.flush();
@@ -162,6 +169,9 @@ public class Workable implements Runnable {
 
 			}
 		}
+//		 catch (ParseException exx) {
+//			exx.printStackTrace();
+//		}
 		return;
 	}
 
@@ -176,7 +186,7 @@ public class Workable implements Runnable {
 	 */
 	public void sendImage(File file, Header head, String filetype, int code) throws IOException {
 		this.size = (int) file.length();
-		head.setHeader(code, filetype, this.size);
+		head.setHeader(code, filetype, this.size, file);
 
 		OutputStream out = clientSocket.getOutputStream();
 		FileInputStream fis = new FileInputStream(file);
