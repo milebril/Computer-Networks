@@ -45,7 +45,7 @@ public class WriteToClient {
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 		Date LastModifiedSince = new Date();
 		
-		if (requestedString.equals("\n")) {
+		if (requestedString.equals("")) {
 			req.close();
 			res.close();
 			clientSocket.close(); // close connection to client when request is empty.
