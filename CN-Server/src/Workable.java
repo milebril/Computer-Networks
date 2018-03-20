@@ -33,15 +33,17 @@ public class Workable implements Runnable {
 			BufferedWriter response = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
 			System.out.println(Thread.currentThread().getName()); // prints out the current threadname
 			WriteToClient wtc = new WriteToClient();
-			wtc.CreateHeader(request, response, clientSocket);
-			request.close();
-			response.close();
+			boolean b = wtc.CreateHeader(request, response, clientSocket);
+			if (b) {
+				response.close();
+				request.close();
+			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
 			try {
 				BufferedWriter response = new BufferedWriter(
-						new OutputStreamWriter(this.clientSocket.getOutputStream()));
+						new OutputStreamWriter(clientSocket.getOutputStream()));
 				Header head = new Header();
 				head.setHeader(500, "", 0, null);
 				response.write(head.getHeader().toString());

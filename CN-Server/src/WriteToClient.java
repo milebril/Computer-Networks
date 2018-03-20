@@ -32,7 +32,7 @@ public class WriteToClient {
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	public void CreateHeader(BufferedReader req, BufferedWriter res, Socket clientSocket)
+	public boolean CreateHeader(BufferedReader req, BufferedWriter res, Socket clientSocket)
 			throws IOException, ParseException, SocketException {
 		
 		String requestedString;
@@ -47,7 +47,7 @@ public class WriteToClient {
 		if (requestedString.equals("")) {
 			System.out.println("isthisNULL: " + requestedString);
 			clientSocket.close(); // close connection to client when request is empty.
-			return;
+			return false;
 		}
 		
 		path = requestedString.split(" ")[1].substring(0); // path to file
@@ -113,5 +113,7 @@ public class WriteToClient {
 //			res.write(head.getHeader().toString());
 			break;
 		}
+		
+		return true;
 	}
 }
