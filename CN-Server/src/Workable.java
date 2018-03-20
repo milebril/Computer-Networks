@@ -18,7 +18,7 @@ public class Workable implements Runnable {
 	 * 
 	 * @param client
 	 */
-	public Workable(Socket client){
+	public Workable(Socket client) {
 		this.clientSocket = client;
 	}
 
@@ -27,32 +27,33 @@ public class Workable implements Runnable {
 	 */
 	@Override
 	public void run() {
-//		long startTime = System.currentTimeMillis();
+
 		try {
-			BufferedReader request = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
-			BufferedWriter response = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));
+			BufferedReader request = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			BufferedWriter response = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
 			System.out.println(Thread.currentThread().getName()); // prints out the current threadname
-//			while (System.currentTimeMillis() < startTime + 30000) {				
-				WriteToClient wtc = new WriteToClient();
-				wtc.CreateHeader(request, response, clientSocket);
-//			}
-			System.out.println("out of time");
-			response.close();
+			WriteToClient wtc = new WriteToClient();
+			wtc.CreateHeader(request, response, clientSocket);
 			request.close();
+			response.close();
+
 		} catch (IOException e) {
+			e.printStackTrace();
 			try {
 				BufferedWriter response = new BufferedWriter(
 						new OutputStreamWriter(this.clientSocket.getOutputStream()));
 				Header head = new Header();
 				head.setHeader(500, "", 0, null);
 				response.write(head.getHeader().toString());
-			}  catch (SocketException exxx) {
+				response.close();
+			} catch (SocketException exxx) {
 				System.out.println("connection to client: " + clientSocket.getInetAddress().getHostName() + " close");
+				exxx.printStackTrace();
 			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 		} catch (ParseException exx) {
 			exx.printStackTrace();
-		}
+		} 
 	}
 }

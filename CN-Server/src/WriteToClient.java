@@ -37,17 +37,15 @@ public class WriteToClient {
 		
 		String requestedString;
 		requestedString = req.readLine(); //first line in the request
-		System.out.println("readdddd: " + requestedString);
 		String header = requestedString + "\n"; 
 		String path = "";
 		String filetype = "";
-		SimpleDateFormat sdf = new SimpleDateFormat(" EEE, dd MMM yyyy HH:mm:ss z");
+		SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 		Date LastModifiedSince = new Date();
 		
 		if (requestedString.equals("")) {
-			req.close();
-			res.close();
+			System.out.println("isthisNULL: " + requestedString);
 			clientSocket.close(); // close connection to client when request is empty.
 			return;
 		}
