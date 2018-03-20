@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -32,10 +33,11 @@ public class WriteToClient {
 	 * @throws ParseException
 	 */
 	public void CreateHeader(BufferedReader req, BufferedWriter res, Socket clientSocket)
-			throws IOException, ParseException {
+			throws IOException, ParseException, SocketException {
 		
 		String requestedString;
 		requestedString = req.readLine(); //first line in the request
+		System.out.println("readdddd: " + requestedString);
 		String header = requestedString + "\n"; 
 		String path = "";
 		String filetype = "";
@@ -43,7 +45,9 @@ public class WriteToClient {
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 		Date LastModifiedSince = new Date();
 		
-		if (requestedString == null) {
+		if (requestedString.equals("\n")) {
+			req.close();
+			res.close();
 			clientSocket.close(); // close connection to client when request is empty.
 			return;
 		}
@@ -60,22 +64,13 @@ public class WriteToClient {
 		while (!requestedString.equals("")) {
 			requestedString = req.readLine();
 			if (requestedString.startsWith("If-Modified-Since: ")) {
-				LastModifiedSince = sdf.parse(requestedString.substring(requestedString.lastIndexOf(" ") + 1));
+				LastModifiedSince = sdf.parse(requestedString.substring(requestedString.indexOf(" ") + 1));
 			}	
 			header = header + requestedString + "\n";
 		}
 		System.out.println(header);
 		Header head = new Header();
 		
-		//the client sends the wrong type of command resulting in an 501 error
-//		if (!command.equals("GET") || !command.equals("PUT") || !command.equals("POST")
-//				|| !command.equals("HEAD") || !command.equals("OPTIONS") || !command.equals("DELETE")
-//				|| !command.equals("GETCOFFEE")) {
-//			System.out.println("METHOD:" + command);
-//			head.setHeader(501, filetype, 0, null);
-//			res.write(head.getHeader().toString());
-//			return;
-//		}
 		
 		//responds according to the given command
 		switch (command) {

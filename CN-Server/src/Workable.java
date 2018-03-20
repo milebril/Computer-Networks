@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.SocketException;
 import java.text.ParseException;
 
 import HTTP.Header;
@@ -17,7 +18,7 @@ public class Workable implements Runnable {
 	 * 
 	 * @param client
 	 */
-	public Workable(Socket client) {
+	public Workable(Socket client){
 		this.clientSocket = client;
 	}
 
@@ -26,26 +27,32 @@ public class Workable implements Runnable {
 	 */
 	@Override
 	public void run() {
+		long startTime = System.currentTimeMillis();
 		try {
-			System.out.println(Thread.currentThread().getName()); // prints out the current thread
 			BufferedReader request = new BufferedReader(new InputStreamReader(this.clientSocket.getInputStream()));
 			BufferedWriter response = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));
-			WriteToClient wtc = new WriteToClient();
-			wtc.CreateHeader(request, response, clientSocket);
+			System.out.println(Thread.currentThread().getName()); // prints out the current threadname
+			while (System.currentTimeMillis() < startTime + 30000) {				
+				WriteToClient wtc = new WriteToClient();
+				wtc.CreateHeader(request, response, clientSocket);
+			}
+			System.out.println("out of time");
 			response.close();
 			request.close();
 		} catch (IOException e) {
+			System.out.println("error1");
 			try {
-				BufferedWriter response = new BufferedWriter(new OutputStreamWriter(this.clientSocket.getOutputStream()));
+				BufferedWriter response = new BufferedWriter(
+						new OutputStreamWriter(this.clientSocket.getOutputStream()));
 				Header head = new Header();
 				head.setHeader(500, "", 0, null);
 				response.write(head.getHeader().toString());
 			} catch (Exception ex) {
+				System.out.println("error2");
 				ex.printStackTrace();
 			}
 		} catch (ParseException exx) {
 			exx.printStackTrace();
 		}
-
 	}
 }
