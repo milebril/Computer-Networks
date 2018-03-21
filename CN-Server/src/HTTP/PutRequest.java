@@ -48,11 +48,13 @@ public class PutRequest {
 		BufferedWriter bodyWriter;
 		try {
 			bodyWriter = new BufferedWriter(new FileWriter(file));
-			bodyWriter.write(body);
+			if (body != null) {
+				bodyWriter.write(body);
+			}
 			bodyWriter.close();
 			return 200;
 		} catch (IOException ex) {
-			return 404; // when it is not possible to write to the file, file is not found
+			return 500; // when it is not possible to write to the file, consider it an internal server error
 		}
 	}
 

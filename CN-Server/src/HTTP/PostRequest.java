@@ -26,12 +26,13 @@ public class PostRequest {
 	 * @throws IOException
 	 */
 	public PostRequest(BufferedReader request, String path, int size, Date LastModifiedSince, String filetype, Header head) throws IOException {
-		String tempbody = request.readLine();
-		String body = tempbody + "\n";
-		while ((tempbody = request.readLine()) != null) {
-			body = body + tempbody + "\n";
-		}
-		head.setHeader(addToServer(body, path), filetype, size, null); 
+        String tempbody = request.readLine();
+        String body = tempbody + "";       
+        while((tempbody = request.readLine()) != null) {
+          body = body + tempbody + "";
+        }body = body + "/r/n";       
+        int code = addToServer(body, path);
+        head.setHeader(code, filetype, size, null); 
 		this.header = head;
 	}
 
@@ -48,12 +49,14 @@ public class PostRequest {
 		BufferedWriter bodyWriter;
 		try {
 			bodyWriter = new BufferedWriter(new FileWriter(file, true));
-			bodyWriter.append(body);
+			if (body != null) {
+				bodyWriter.write(body);
+			}
 			bodyWriter.close();
 			return 200;
 		} catch (IOException ex) {
-			return 404; // when it is not possible to write to the file, file is not found
-		}
+			return 500; // when it is not possible to write to the file, consider it an internal server error
+}
 
 	}
 
