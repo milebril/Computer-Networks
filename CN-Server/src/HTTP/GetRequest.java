@@ -94,6 +94,7 @@ public class GetRequest {
 			System.out.println("Fout image ingelezen!");
 		}
 		out.flush();
+		fis.close();
 	}
 
 	/**

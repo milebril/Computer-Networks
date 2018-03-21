@@ -59,13 +59,12 @@ public class WriteToClient {
 
 		// input from client
 		while (!(requestedString = req.readLine()).equals("")) {
-//			requestedString = req.readLine();
 			if (requestedString.startsWith("If-Modified-Since: ")) {
 				LastModifiedSince = sdf.parse(requestedString.substring(requestedString.indexOf(" ") + 1));
 			}	
 			requestedHead = requestedHead + requestedString + "\n";
 		}
-		System.out.println(requestedHead);
+//		System.out.println(requestedHead);
 		Header head = new Header();
 		
 		

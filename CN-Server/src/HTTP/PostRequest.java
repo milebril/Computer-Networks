@@ -30,7 +30,7 @@ public class PostRequest {
         String body = tempbody + "";       
         while((tempbody = request.readLine()) != null) {
           body = body + tempbody + "";
-        }body = body + "/r/n";       
+        }      
         int code = addToServer(body, path);
         head.setHeader(code, filetype, size, null); 
 		this.header = head;
