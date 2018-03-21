@@ -74,16 +74,16 @@ public class HTTPRequest {
 		PrintWriter writer = new PrintWriter(output, true);
 
 		if (request.getPath().startsWith("/")) {
-			System.out.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1");
-			writer.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1");
+			System.out.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1\r");
+			writer.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1\r");
 		} else {
-			System.out.println(request.getCommand() + " /" + request.getPath() + " HTTP/1.1");
-			writer.println(request.getCommand() + " /" + request.getPath() + " HTTP/1.1");
+			System.out.println(request.getCommand() + " /" + request.getPath() + " HTTP/1.1\r");
+			writer.println(request.getCommand() + " /" + request.getPath() + " HTTP/1.1\r");
 		}
-		writer.println("Host: " + request.getURI() + ":" + request.getPort() + "");
-		writer.println("Accept: " + type + "");
-		writer.println("Connection: close");
-		writer.println("");
+		writer.println("Host: " + request.getURI() + ":" + request.getPort() + "\r");
+		writer.println("Accept: " + type + "\r");
+		writer.println("Connection: close\r");
+		writer.println("\r");
 
 		return clientSocket;
 	}
