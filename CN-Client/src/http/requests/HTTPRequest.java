@@ -74,16 +74,16 @@ public class HTTPRequest {
 		PrintWriter writer = new PrintWriter(output, true);
 
 		if (request.getPath().startsWith("/")) {
-			System.out.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1\r");
-			writer.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1\r");
+			System.out.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1");
+			writer.println(request.getCommand() + " " + request.getPath() + " HTTP/1.1");
 		} else {
-			System.out.println(request.getCommand() + " /" + request.getPath() + " HTTP/1.1\r");
-			writer.println(request.getCommand() + " /" + request.getPath() + " HTTP/1.1\r");
+			System.out.println(request.getCommand() + " /" + request.getPath() + " HTTP/1.1");
+			writer.println(request.getCommand() + " /" + request.getPath() + " HTTP/1.1");
 		}
-		writer.println("Host: " + request.getURI() + ":" + request.getPort() + "\r");
-		writer.println("Accept: " + type + "\r");
-		writer.println("Connection: Keep-Alive\r");
-		writer.println("\r");
+		writer.println("Host: " + request.getURI() + ":" + request.getPort() + "");
+		writer.println("Accept: " + type + "");
+		writer.println("Connection: Keep-Alive");
+		writer.println("");
 
 		return clientSocket;
 	}

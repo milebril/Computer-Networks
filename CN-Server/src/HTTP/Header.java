@@ -22,7 +22,6 @@ public class Header {
 	 * setter for the header
 	 * 
 	 * @param file
-	 *            TODO
 	 * @return
 	 */
 	public void setHeader(int code, String type, int size, File file) {

@@ -46,9 +46,16 @@ public class Client{
 			//Search for img tags
 			for (Element e : doc.select("img")) {
 				System.out.println(request.getURL().toString() + "/" + e.attr("src"));
-				Request imgRequest = new Request("GET", 
-						request.getURL().toString() + "/" + e.attr("src")
-						, request.getPort()); //Set up a new Request
+				Request imgRequest;
+				if ( e.attr("src").startsWith("http")) {
+					imgRequest = new Request("GET", 
+							e.attr("src")
+							, request.getPort()); //Set up a new Request
+				} else {
+					imgRequest = new Request("GET", 
+							request.getURL().toString() + "/" + e.attr("src")
+							, request.getPort()); //Set up a new Request
+				}
 				//System.out.println("Getting image... " + request.getURL().toString() + "/" + e.attr("src"));
 				HTTPRequest request = new HTTPRequest(imgRequest); //Make the request
 				HTTPResponse response = request.getResponse(); //Here is the response written

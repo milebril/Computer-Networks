@@ -12,6 +12,12 @@ public class OptionsRequest {
 		return header;
 	}
 	
+	/**
+	 * fulfills the request OPTIONS
+	 * @param head
+	 * @param size
+	 * @param filetype
+	 */
 	public OptionsRequest(Header head, int size, String filetype) {
 	head.setHeader(201, filetype, size, null);
 	header = head;

@@ -45,7 +45,6 @@ public class WriteToClient {
 		Date LastModifiedSince = new Date();
 		
 		if (requestedString == null || requestedString.equals("")) { // close the socket when the request is empty
-			System.out.println("connection to " + clientSocket.getInetAddress().getHostName() + " closed\n	");
 			clientSocket.close(); // close connection to client when request is empty.
 			return false;
 		}
@@ -59,8 +58,8 @@ public class WriteToClient {
 		String command = requestedString.split(" ")[0]; //  command from the client
 
 		// input from client
-		while (!requestedString.equals("")) {
-			requestedString = req.readLine();
+		while (!(requestedString = req.readLine()).equals("")) {
+//			requestedString = req.readLine();
 			if (requestedString.startsWith("If-Modified-Since: ")) {
 				LastModifiedSince = sdf.parse(requestedString.substring(requestedString.indexOf(" ") + 1));
 			}	
