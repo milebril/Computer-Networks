@@ -86,19 +86,22 @@ public class Header {
 			head.append("HTTP/1.1 500 Internal Server Error\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
-			head.append("X-Server: yea, we messed up, sorry\r\n");
+			head.append("Server: yea, we messed up, sorry\r\n");
+			head.append("Connection: Keep-Alive\r\n\r\n");
 			head.append("\r\n");
 			break;
 		case 400:
 			head.append("HTTP/1.1 400 Bad Request\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
+			head.append("Connection: Keep-Alive\r\n\r\n");
 			head.append("\r\n");
 			break;
 		case 501:
 			head.append("HTTP/1.1 501 Method Not Implemented\r\n");
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
+			head.append("Connection: Keep-Alive\r\n\r\n");
 			head.append("\r\n");
 			break;
 		case 418:
@@ -106,6 +109,7 @@ public class Header {
 			head.append("Date:" + getTimeStamp() + "\r\n");
 			head.append("Server:localhost\r\n");
 			head.append("X-Barista: the server refuses to brew coffee because it is a teapot\r\n");
+			head.append("Connection: Keep-Alive\r\n\r\n");
 			head.append("\r\n");
 			break;
 		}

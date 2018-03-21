@@ -1,5 +1,4 @@
-import HTTP.Header;
-
+package HTTP;
 public class OptionsRequest {
 
 	private Header header;

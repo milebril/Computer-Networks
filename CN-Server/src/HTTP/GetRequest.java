@@ -22,6 +22,17 @@ public class GetRequest {
 		return header;
 	}
 
+	/**
+	 * fulfills the request GET
+	 * @param request
+	 * @param path
+	 * @param size
+	 * @param LastModifiedSince
+	 * @param filetype
+	 * @param head
+	 * @param clientSocket
+	 * @throws IOException
+	 */
 	public GetRequest(BufferedReader request, String path, int size, Date LastModifiedSince, String filetype,
 			Header head, Socket clientSocket) throws IOException {
 		if (!new File("../res" + path).exists()) {
@@ -82,8 +93,7 @@ public class GetRequest {
 		if (cd != file.length()) {
 			System.out.println("Fout image ingelezen!");
 		}
-		out.close();
-		fis.close();
+		out.flush();
 	}
 
 	/**

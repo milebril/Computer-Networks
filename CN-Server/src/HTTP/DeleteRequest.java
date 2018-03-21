@@ -12,6 +12,15 @@ public class DeleteRequest {
 		return header;
 	}
 
+	/**
+	 * fulfills the request DELETE
+	 * @param path
+	 * @param size
+	 * @param LastModifiedSince
+	 * @param filetype
+	 * @param head
+	 * @throws IOException
+	 */
 	public DeleteRequest(String path, int size, Date LastModifiedSince, String filetype, Header head) throws IOException {
 		if (new File("../res" + path).exists()) {
 			new File("../res" + path).delete();

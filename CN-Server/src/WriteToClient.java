@@ -8,10 +8,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import HTTP.CoffeeRequest;
 import HTTP.DeleteRequest;
 import HTTP.GetRequest;
 import HTTP.HeadRequest;
 import HTTP.Header;
+import HTTP.OptionsRequest;
 import HTTP.PostRequest;
 import HTTP.PutRequest;
 
@@ -25,27 +27,25 @@ public class WriteToClient {
 	}
 
 	/**
-	 * creates the header and in some cases a body to return to the client
+	 * creates the header and in some cases a body and writes these to the client
 	 * @param req
 	 * @param res
 	 * @param clientSocket
-	 * @throws IOException
-	 * @throws ParseException
 	 */
 	public boolean CreateHeader(BufferedReader req, BufferedWriter res, Socket clientSocket)
-			throws IOException, ParseException, SocketException {
+			throws IOException, ParseException, SocketException, Exception {
 		
-		String requestedString;
+		String requestedString = null;
 		requestedString = req.readLine(); //first line in the request
-		String header = requestedString + "\n"; 
+		String requestedHead = requestedString + "\n"; 		
 		String path = "";
 		String filetype = "";
 		SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 		Date LastModifiedSince = new Date();
 		
-		if (requestedString.equals("")) {
-			System.out.println("isthisNULL: " + requestedString);
+		if (requestedString == null || requestedString.equals("")) { // close the socket when the request is empty
+			System.out.println("connection to " + clientSocket.getInetAddress().getHostName() + " closed\n	");
 			clientSocket.close(); // close connection to client when request is empty.
 			return false;
 		}
@@ -64,28 +64,28 @@ public class WriteToClient {
 			if (requestedString.startsWith("If-Modified-Since: ")) {
 				LastModifiedSince = sdf.parse(requestedString.substring(requestedString.indexOf(" ") + 1));
 			}	
-			header = header + requestedString + "\n";
+			requestedHead = requestedHead + requestedString + "\n";
 		}
-		System.out.println(header);
+		System.out.println(requestedHead);
 		Header head = new Header();
 		
 		
 		//responds according to the given command
 		switch (command) {
-		case "HEAD":
+		case "HEAD": //returns the header to the client
 			HeadRequest Headrequest = new HeadRequest(path, 0, LastModifiedSince, filetype, head);
 			res.write(Headrequest.getHeader().getHeader().toString());
 			res.write(Headrequest.getHeader().getHeader().toString());
 			break;
-		case "PUT":
+		case "PUT": // overwrites or creates a given file
 			PutRequest PutRequest = new PutRequest(req, path, 0, LastModifiedSince, filetype, head);
 			res.write(PutRequest.getHeader().getHeader().toString());
 			break;
-		case "POST":
+		case "POST": // adds data to a given file
 			PostRequest PostRequest = new PostRequest(req, path, 0, LastModifiedSince, filetype, head);
 			res.write(PostRequest.getHeader().getHeader().toString());
 			break;
-		case "GET":
+		case "GET": //returns a file to the client
 			GetRequest GetRequest = new GetRequest(req, path, 0, LastModifiedSince, filetype, head, clientSocket);
 			if (!filetype.equals("jpg") && !filetype.equals("png")) {
 				res.write(GetRequest.getHeader().getHeader().toString());
@@ -94,14 +94,14 @@ public class WriteToClient {
 				}
 			}	
 			break;
-		case "GETCOFFEE":
+		case "GETCOFFEE": // Just a fun 418 I'm a teapot
 			CoffeeRequest CoffeeRequest = new CoffeeRequest(head, filetype, clientSocket);
 			break;
-		case "DELETE":
+		case "DELETE": // Deletes a given file
 			DeleteRequest DeleteRequest = new DeleteRequest(path, 0, LastModifiedSince, filetype, head);
 			res.write(DeleteRequest.getHeader().getHeader().toString());
 			break;
-		case "OPTIONS":
+		case "OPTIONS": // returns the options implemented
 			OptionsRequest OptionsRequest = new OptionsRequest(head, 0, command);
 			res.write(OptionsRequest.getHeader().getHeader().toString());
 			res.write(OptionsRequest.getBody().toString());
@@ -109,8 +109,6 @@ public class WriteToClient {
 		default: // in the default case we consider it the fault of the client
 			head.setHeader(400, filetype, 0, null);
 			res.write(head.getHeader().toString()); //TODO Checken uit request header
-//			head.setHeader(501, filetype, 0, null);
-//			res.write(head.getHeader().toString());
 			break;
 		}
 		

@@ -11,6 +11,14 @@ public class HeadRequest {
 		return header;
 	}
 	
+	/**
+	 * fulfills the request HEAD
+	 * @param path
+	 * @param size
+	 * @param LastModifiedSince
+	 * @param filetype
+	 * @param head
+	 */
 	public HeadRequest(String path, int size, Date LastModifiedSince, String filetype, Header head) {
 		if (new File("../res" + path).exists()) {
 			if (LastModifiedSince == null || LastModifiedSince.before(new Date(new File("../res" + path).lastModified()))) {

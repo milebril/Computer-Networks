@@ -15,6 +15,16 @@ public class PutRequest {
 		return header;
 	}
 
+	/**
+	 * fulfills the request PUT
+	 * @param request
+	 * @param path
+	 * @param size
+	 * @param LastModifiedSince
+	 * @param filetype
+	 * @param head
+	 * @throws IOException
+	 */
 	public PutRequest(BufferedReader request, String path, int size, Date LastModifiedSince, String filetype, Header head) throws IOException {
 		String tempbody = request.readLine();
 		String body = tempbody + "\n";
