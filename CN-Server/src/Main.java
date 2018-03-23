@@ -10,5 +10,4 @@ public class Main {
 		MultiThreadedServer server = new MultiThreadedServer(port);
 		server.start();
 	}
-	
 }

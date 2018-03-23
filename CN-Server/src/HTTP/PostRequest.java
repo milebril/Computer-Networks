@@ -26,11 +26,10 @@ public class PostRequest {
 	 * @throws IOException
 	 */
 	public PostRequest(BufferedReader request, String path, int size, Date LastModifiedSince, String filetype, Header head) throws IOException {
-        String tempbody = request.readLine();
-        String body = tempbody + "";       
-        while((tempbody = request.readLine()) != null) {
-          body = body + tempbody + "";
-        }      
+		String body = "";  
+        for (String tempbody = request.readLine(); tempbody != null && request.ready(); tempbody = request.readLine()) {
+          body = body + tempbody + "\n";
+        }   
         int code = addToServer(body, path);
         head.setHeader(code, filetype, size, null); 
 		this.header = head;

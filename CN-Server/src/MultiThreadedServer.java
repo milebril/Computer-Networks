@@ -32,7 +32,7 @@ public class MultiThreadedServer {
 		while(true) {
 			try {
 				client = this.serverSocket.accept();
-				System.out.println("Connected client:" + client.getInetAddress());
+//				System.out.println("Connected client:" + client.getInetAddress());
 				Workable thread = new Workable(client);
 				this.threadPool.execute(thread);
 			}catch(IOException ex) {

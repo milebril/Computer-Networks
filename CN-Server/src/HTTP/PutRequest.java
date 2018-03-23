@@ -26,11 +26,10 @@ public class PutRequest {
 	 * @throws IOException
 	 */
 	public PutRequest(BufferedReader request, String path, int size, Date LastModifiedSince, String filetype, Header head) throws IOException {
-		String tempbody = request.readLine();
-		String body = tempbody + "\n";
-		while ((tempbody = request.readLine()) != null) {
-			body = body + tempbody + "\n";
-		}
+		String body = "";  
+        for (String tempbody = request.readLine(); tempbody != null && request.ready(); tempbody = request.readLine()) {
+          body = body + tempbody + "\n";
+        }
 		head.setHeader(writeToServer(body, path), filetype, size, null); 
 		this.header = head;
 	}

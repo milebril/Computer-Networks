@@ -29,7 +29,7 @@ public class Workable implements Runnable {
 			try {			
 				BufferedReader request = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 				BufferedWriter response = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-				System.out.println(Thread.currentThread().getName()); // prints out the current threadname
+//				System.out.println(Thread.currentThread().getName()); // prints out the current threadname
 				WriteToClient wtc = new WriteToClient();
 				boolean emptyRequest = wtc.CreateHeader(request, response, clientSocket); 
 				if (emptyRequest) {
